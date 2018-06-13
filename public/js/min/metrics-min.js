@@ -1,0 +1,2 @@
+$(function(){$("#add-metric").on("click",function(t){t.preventDefault();var a=$(".metric:last").clone(),n=parseInt(a.attr("data-count")),e=n+1;a.attr("data-count",e),a.find("input").val(""),a.find("select").val(0),a.find("input, select").each(function(){$(this).attr({name:$(this).attr("name").replace(/\[\d+\]/,"["+e+"]")})}),$("#metrics").append(a)})});
+//# sourceMappingURL=./metrics-min.js.map

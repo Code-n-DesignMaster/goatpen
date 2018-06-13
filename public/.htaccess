@@ -1,0 +1,8 @@
+RewriteEngine on
+
+RewriteRule ^css/([a-z\-]+)\-[\da-f]{32}\.css$ /css/$1.css [L]
+RewriteRule ^js/([a-z\-]+)\-[\da-f]{32}\.js$ /js/min/$1-min.js [L]
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L]

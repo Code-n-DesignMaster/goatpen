@@ -1,0 +1,22 @@
+<?php
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Delete post from campaign',
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <p class="lead">Are you sure you want to delete post '<?= HTML::text($channel->name); ?>' from campaign '<?= HTML::text($campaign->name); ?>' for <?= HTML::text($campaign->client); ?>?</p>
+
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-danger">Delete</button>
+            or <a href="/campaigns/<?= $campaign->id; ?>/edit">cancel</a>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

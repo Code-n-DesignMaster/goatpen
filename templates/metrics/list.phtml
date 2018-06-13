@@ -1,0 +1,57 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Metrics',
+    'actions'   => (new ActionsNavigation)->add('Add new', '/metrics/new', 'plus'),
+]);
+?>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Scope</th>
+            <th>Platforms</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($metrics as $metric) {
+        ?>
+            <tr>
+                <td>
+                    <a href="/metrics/<?= HTML::attr($metric->id); ?>/edit"><?= HTML::text($metric->name); ?></a>
+                    <?php
+                    $extra = [];
+
+                    if ($metric->stats) {
+                        $extra[] = 'channel-level';
+                    }
+
+                    if ($metric->automated) {
+                        $extra[] = 'automated';
+                    }
+
+                    if (! empty($extra)) {
+                        echo '<small>(' . implode(', ', $extra) . ')</small>';
+                    }
+                    ?>
+                </td>
+                <td><?= HTML::text($metric->scope); ?></td>
+                <td>
+                    <?php
+                    echo implode(', ', array_map(function ($value) {
+                        return HTML::text($value);
+                    }, $metric->platforms()->orderBy('name', 'asc')->pluck('name')->toArray()));
+                    ?>
+                </td>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

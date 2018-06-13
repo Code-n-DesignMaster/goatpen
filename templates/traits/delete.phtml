@@ -1,0 +1,22 @@
+<?php
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Delete trait',
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <p class="lead">Are you sure you want to delete trait '<?= HTML::text($trait->name); ?>'?</p>
+
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-danger">Delete</button>
+            or <a href="/traits/<?= $trait->getKey(); ?>/edit">cancel</a>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

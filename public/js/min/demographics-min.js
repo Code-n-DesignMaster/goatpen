@@ -1,0 +1,2 @@
+$(function(){$("#channels").on("click","#add-demographic",function(n){n.preventDefault();var e=$(this).parents(".form-group").find(".demographics"),c=e.find(".demographic:last").clone();c.find("select, input").val(""),e.append(c),c.find("select").focus()})});
+//# sourceMappingURL=./demographics-min.js.map

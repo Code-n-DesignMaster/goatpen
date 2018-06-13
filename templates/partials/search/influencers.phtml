@@ -1,0 +1,342 @@
+<?php
+use GoatPen\Search\InfluencerSearch;
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\{CountryCodes, Tag};
+use GoatPen\{Influencer, InfluencerTrait, Metric, Platform, User};
+use LaravelGems\Escape\HTML;
+?>
+
+<form class="collapse" id="filters">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="name">Name</label>
+
+                        <input class="form-control" name="name" id="name" maxlength="256" value="<?= HTML::attr($filters->name); ?>" placeholder="Name:">
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="gender">Gender</label>
+
+                        <select class="form-control" name="gender" id="gender">
+                            <option value="">Gender:</option>
+                            <?php
+                            foreach (Influencer::GENDERS as $gender) {
+                                echo sprintf(
+                                    '<option %s>%s</option>',
+                                    ($filters->gender === $gender ? 'selected' : ''),
+                                    HTML::text($gender)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="age_group">Age</label>
+
+                        <select class="form-control" name="age_group" id="age_group">
+                            <option value="">Age:</option>
+                            <?php
+                            foreach (Influencer::AGE_GROUPS as $age_group) {
+                                echo sprintf(
+                                    '<option %s>%s</option>',
+                                    ($filters->age_group === $age_group ? 'selected' : ''),
+                                    HTML::text($age_group)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="location">Location</label>
+
+                        <select class="form-control" name="location" id="location">
+                            <option value="">Location:</option>
+                            <?php
+                            foreach (CountryCodes::countries() as $code => $country) {
+                                echo sprintf(
+                                    '<option value="%s" %s>%s</option>',
+                                    HTML::attr($code),
+                                    ($filters->location === $code ? 'selected' : ''),
+                                    HTML::text($country)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="nationality">Nationality</label>
+
+                        <select class="form-control" name="nationality" id="nationality">
+                            <option value="">Nationality:</option>
+                            <?php
+                            foreach (CountryCodes::countries() as $code => $country) {
+                                echo sprintf(
+                                    '<option value="%s" %s>%s</option>',
+                                    HTML::attr($code),
+                                    ($filters->nationality === $code ? 'selected' : ''),
+                                    HTML::text($country)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="platform_id">Platform</label>
+
+                        <select class="form-control" name="platform_id" id="platform_id">
+                            <option value="">Platform:</option>
+                            <?php
+                            foreach (Platform::query()->orderBy('order', 'asc')->get() as $platform) {
+                                echo sprintf(
+                                    '<option value="%s" %s>%s</option>',
+                                    HTML::attr($platform->id),
+                                    ((int) $filters->platform_id === $platform->id ? 'selected' : ''),
+                                    HTML::text($platform->name)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only">Price</label>
+
+                        <div class="row no-gutter related">
+                            <div class="col-sm-6">
+                                <select class="form-control" name="price_operator">
+                                    <option value="">Price:</option>
+                                    <?php
+                                    foreach (InfluencerSearch::OPERATORS as $operator) {
+                                        echo sprintf(
+                                            '<option %s>%s</option>',
+                                            ($filters->price_operator === $operator ? 'selected' : ''),
+                                            HTML::text($operator)
+                                        );
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <input type="number" min="0" step="0.01" class="form-control" name="price" value="<?= HTML::attr($filters->price); ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only" for="user_id">Contact</label>
+
+                        <select class="form-control" name="user_id" id="user_id">
+                            <option value="">Contact:</option>
+                            <?php
+                            foreach (User::query()->orderBy('name', 'asc')->get() as $user) {
+                                echo sprintf(
+                                    '<option value="%s" %s>%s</option>',
+                                    HTML::attr($user->id),
+                                    ((int) $filters->user_id === $user->id ? 'selected' : ''),
+                                    HTML::text($user->name)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-8 col-sm-7_2">
+                    <div class="form-group">
+                        <label class="sr-only">Metrics</label>
+
+                        <ul class="list-unstyled" id="metrics">
+                            <?php
+                            $selectedMetrics = $filters->metrics ?: [[]];
+                            $key             = 0;
+
+                            foreach ($selectedMetrics as $selectedMetric) {
+                                ?>
+                                <li class="metric" data-count="<?= $key; ?>">
+                                    <div class="row related">
+                                        <div class="col-sm-4">
+                                            <select class="form-control" name="metric[<?= $key; ?>][id]">
+                                                <option value="">Metrics:</option>
+                                                <?php
+                                                foreach (Metric::SCOPES as $scope) {
+                                                    ?>
+                                                    <optgroup label="<?= HTML::attr($scope); ?>">
+                                                        <?php
+                                                        $metrics = Metric::query()
+                                                            ->where('scope', '=', $scope)
+                                                            ->orderBy('name', 'asc');
+
+                                                        foreach ($metrics->get() as $metric) {
+                                                            echo sprintf(
+                                                                '<option value="%d" %s>%s</option>',
+                                                                HTML::attr($metric->id),
+                                                                ((int) ($selectedMetric['id'] ?? null) === $metric->id ? 'selected' : ''),
+                                                                HTML::text($metric->name)
+                                                            );
+                                                        }
+                                                        ?>
+                                                    </optgroup>
+                                                    <?php
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <select class="form-control" name="metric[<?= $key; ?>][operator]">
+                                                <option></option>
+                                                <?php
+                                                foreach (InfluencerSearch::OPERATORS as $operator) {
+                                                    echo sprintf(
+                                                        '<option %s>%s</option>',
+                                                        (($selectedMetric['operator'] ?? null) === $operator ? 'selected' : ''),
+                                                        HTML::text($operator)
+                                                    );
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <input type="number" min="0" step="0.01" class="form-control" name="metric[<?= $key; ?>][quantity]" value="<?= HTML::attr($selectedMetric['quantity'] ?? null); ?>">
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php
+                                $key++;
+                            }
+                            ?>
+                        </ul>
+
+                        <p>
+                            <a href="#" id="add-metric">
+                                <i class="fa fa-plus"></i>
+                                Filter by another metric
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only">Tags</label>
+
+                        <ul class="list-unstyled" id="tags">
+                            <?php
+                            $tags = $filters->tags ?: [null];
+
+                            foreach ($tags as $selectedTag) {
+                                ?>
+                                <li class="tag">
+                                    <select class="form-control" name="tag[]">
+                                        <option value="">Tags:</option>
+                                        <?php
+                                        foreach (Tag::all() as $tag) {
+                                            echo sprintf(
+                                                '<option %s>%s</option>',
+                                                ($selectedTag === $tag ? 'selected' : ''),
+                                                HTML::text($tag)
+                                            );
+                                        }
+                                        ?>
+                                    </select>
+                                </li>
+                                <?php
+                            }
+                            ?>
+                        </ul>
+
+                        <p>
+                            <a href="#" id="add-tag">
+                                <i class="fa fa-plus"></i>
+                                Filter by another tag
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-sm-2_4">
+                    <div class="form-group">
+                        <label class="sr-only">Traits</label>
+
+                        <ul class="list-unstyled" id="traits">
+                            <?php
+                            $traits         = InfluencerTrait::query()->orderBy('name', 'asc')->get();
+                            $selectedTraits = ($filters->traits ?: [null]);
+
+                            foreach ($selectedTraits as $selectedTrait) {
+                                ?>
+                                <li class="trait">
+                                    <select class="form-control" name="trait[]">
+                                        <option value="">Traits:</option>
+                                        <?php
+                                        foreach ($traits as $trait) {
+                                            echo sprintf(
+                                                '<option value="%d" %s>%s</option>',
+                                                HTML::attr($trait->getKey()),
+                                                ((int) $selectedTrait === $trait->getKey() ? 'selected' : ''),
+                                                HTML::text($trait->name)
+                                            );
+                                        }
+                                        ?>
+                                    </select>
+                                </li>
+                                <?php
+                            }
+                            ?>
+                        </ul>
+
+                        <p>
+                            <a href="#" id="add-trait">
+                                <i class="fa fa-plus"></i>
+                                Filter by another trait
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-footer text-right">
+            <button class="btn btn-primary">Filter influencers</button>
+        </div>
+    </div>
+
+    <?php
+    if ($campaign) {
+        ?>
+        <input type="hidden" name="campaign" value="<?= $campaign->getKey(); ?>">
+        <?php
+    }
+    ?>
+</form>
+
+<script src="<?= CacheBuster::getPath('/js/tags.js'); ?>"></script>
+<script src="<?= CacheBuster::getPath('/js/traits.js'); ?>"></script>
+<script src="<?= CacheBuster::getPath('/js/metrics.js'); ?>"></script>

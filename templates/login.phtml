@@ -1,0 +1,51 @@
+<?php
+use GoatPen\ViewHelpers\Notification;
+?>
+
+<!DOCTYPE html>
+
+<html lang="en" class="mode-<?= ENV; ?>">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+
+    <title>Login to Goat Pen</title>
+
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
+
+    <script src="https://use.fontawesome.com/b56362b157.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="col-lg-4 col-lg-offset-4">
+            <div class="page-header text-center">
+                <h1>Login to Goat Pen (Client Dashboard)</h1>
+            </div>
+
+            <?= Notification::render(); ?>
+
+            <form method="post">
+                <div class="form-group">
+                    <label class="sr-only" for="email">Email address</label>
+                    <input type="email" class="form-control input-lg" name="email" id="email" placeholder="Email" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+                    <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+                    <button class="btn btn-primary btn-lg btn-block">Send me a login link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

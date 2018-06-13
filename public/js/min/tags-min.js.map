@@ -1,0 +1,1 @@
+{"version":3,"sources":["../tags.js"],"names":["$","on","event","preventDefault","$tag","clone","find","val","append","focus"],"mappings":"AAAAA,EAAE,WACEA,EAAE,YAAYC,GAAG,QAAS,SAAUC,GAChCA,EAAMC,gBAEN,IAAIC,GAAOJ,EAAE,aAAaK,OAE1BD,GAAKE,KAAK,UAAUC,IAAI,GAExBP,EAAE,SAASQ,OAAOJ,GAElBA,EAAKE,KAAK,SAASG","file":"tags-min.js"}

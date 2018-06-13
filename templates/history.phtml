@@ -1,0 +1,59 @@
+<?php
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'History for ' . ($revisionable->name ?? basename(str_replace('\\', '/', get_class($revisionable)))),
+]);
+
+$paginator->display();
+?>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Action</th>
+            <th>From</th>
+            <th>To</th>
+            <th>User</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($revisions as $revision) {
+            $date = $revision->created_at->timezone('Europe/London')->format('j M Y');
+            ?>
+            <tr>
+                <td><?= (($previousDate ?? null) !== $date ? $date : ''); ?></td>
+                <td><?= $revision->created_at->timezone('Europe/London')->format('H:i'); ?></td>
+                <td>
+                    <?php
+                    switch ($revision->key) {
+                        case 'created_at':
+                            echo 'Created';
+                            break;
+                        case 'deleted_at':
+                            echo 'Deleted';
+                            break;
+                        default:
+                            echo 'Changed ' . HTML::text($revision->key);
+                            break;
+                    }
+                    ?>
+                </td>
+                <td><?= $revision->format($revision->old_value); ?></td>
+                <td><?= $revision->format($revision->new_value); ?></td>
+                <td><?= ($revision->user ? HTML::text($revision->user->name) : '<span class="text-muted">System</span>'); ?></td>
+            </tr>
+            <?php
+            $previousDate = $date;
+        }
+        ?>
+    </tbody>
+</table>
+
+<?php
+$paginator->display();
+
+echo $this->fetch('partials/footer.phtml');

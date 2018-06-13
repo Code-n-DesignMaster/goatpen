@@ -1,0 +1,7 @@
+.idea
+config/config.php
+config/google-credentials.php
+config/google-credentials.json
+uploads
+vendor
+database/json_store

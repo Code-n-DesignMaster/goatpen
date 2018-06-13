@@ -1,0 +1,507 @@
+<?php
+use GoatPen\Formatters\Phrasing;
+use GoatPen\Services\CacheBuster;
+use GoatPen\Utilities\Text;
+use GoatPen\ViewHelpers\Number;
+use GoatPen\{Demographic, Metric, Session};
+use Iso3166\Codes;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => $influencer->name,
+    'showTitle' => false,
+]);
+?>
+
+<div class="row">
+    <div class="col-lg-3">
+        <p><img class="img-circle" src="https://placehold.it/400x400" alt="<?= HTML::attr($influencer->name); ?>" width="200" height="200"></p>
+
+        <table class="table table-condensed table-list">
+            <tbody>
+                <?php
+                if ($influencer->user) {
+                    ?>
+                    <tr>
+                        <th>Primary<br>Contact</th>
+                        <td>
+                            <strong><?= HTML::text($influencer->user->name); ?></strong><br>
+                            <a href="mailto:<?= HTML::attr($influencer->user->email); ?>"><?= HTML::text($influencer->user->email); ?></a>
+                        </td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->secondaryUser) {
+                    ?>
+                    <tr>
+                        <th>Secondary<br>Contact</th>
+                        <td>
+                            <strong><?= HTML::text($influencer->secondaryUser->name); ?></strong><br>
+                            <a href="mailto:<?= HTML::attr($influencer->secondaryUser->email); ?>"><?= HTML::text($influencer->secondaryUser->email); ?></a>
+                        </td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->email) {
+                    ?>
+                    <tr>
+                        <th>E-mail</th>
+                        <td>
+                            <a href="mailto:<?= HTML::attr($influencer->email); ?>"><?= HTML::text($influencer->email); ?></a>
+                        </td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->phone) {
+                    ?>
+                    <tr>
+                        <th>Phone</th>
+                        <td><?= HTML::text($influencer->phone); ?></td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->gender) {
+                    ?>
+                    <tr>
+                        <th>Gender</th>
+                        <td><?= HTML::text($influencer->gender); ?></td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->age_group) {
+                    ?>
+                    <tr>
+                        <th>Age Group</th>
+                        <td><?= HTML::text($influencer->age_group); ?></td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->location) {
+                    ?>
+                    <tr>
+                        <th>Location</th>
+                        <td><?= HTML::text(Codes::country($influencer->location)); ?></td>
+                    </tr>
+                    <?php
+                }
+
+                if ($influencer->nationality) {
+                    ?>
+                    <tr>
+                        <th>Nationality</th>
+                        <td><?= HTML::text(Codes::country($influencer->nationality)); ?></td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </tbody>
+        </table>
+
+        <?php
+        if ($influencer->tags) {
+            ?>
+            <hr>
+
+            <h2>Tags</h2>
+
+            <ul class="list-inline list-pills">
+                <?php
+                if ($tag = $influencer->primary_tag) {
+                    ?>
+                    <li><a href="/influencers?tag[]=<?= HTML::param($tag); ?>"><span class="label label-primary"><?= HTML::text($tag); ?></span></a></li>
+                    <?php
+                }
+
+                foreach ($influencer->tags ?? [] as $tag) {
+                    ?>
+                    <li><a href="/influencers?tag[]=<?= HTML::param($tag); ?>"><span class="label label-secondary"><?= HTML::text($tag); ?></span></a></li>
+                    <?php
+                }
+                ?>
+            </ul>
+            <?php
+        }
+
+        if ($influencer->traits->count() > 0) {
+            ?>
+            <hr>
+
+            <h2>Key traits</h2>
+
+            <ul>
+                <?php
+                foreach ($influencer->traits as $trait) {
+                    echo '<li><a href="/influencers?trait[]=' . HTML::param($trait->getKey()) . '">' . HTML::text($trait->name) . '</a></li>' . PHP_EOL;
+                }
+                ?>
+            </ul>
+            <?php
+        }
+        ?>
+
+        <hr>
+
+        <ul class="list-inline actions">
+            <li>
+                <a href="/influencers/<?= $influencer->id; ?>/edit">
+                    <i class="fa fa-pencil"></i>
+                    Edit
+                </a>
+            </li>
+            <?php
+            if (Session::getUser()->owner) {
+                ?>
+                <li>
+                    <a href="/influencers/<?= $influencer->id; ?>/history">
+                        <i class="fa fa-history"></i>
+                        History
+                    </a>
+                </li>
+                <?php
+            }
+            ?>
+            <li>
+                <a href="/influencers/<?= $influencer->id; ?>/delete">
+                    <i class="fa fa-trash"></i>
+                    Delete
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="col-lg-9">
+        <ul class="nav nav-tabs border-goat" id="channel-tabs">
+            <li>
+                <a class="bg-goat" href="#influencer" data-toggle="tab" data-platform="goat">Influencer</a>
+            </li>
+            <?php
+            foreach ($channels as $channel) {
+                ?>
+                <li>
+                    <a class="bg-<?= Text::asUri($channel->platform->name); ?>" href="#channel-<?= $channel->getKey(); ?>" data-toggle="tab" data-platform="<?= Text::asUri($channel->platform->name); ?>"><?= HTML::text($channel->platform->name); ?></a>
+                </li>
+                <?php
+            }
+            ?>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane" id="influencer">
+                <div class="page-header">
+                    <h2>
+                        <?= HTML::text($influencer->name); ?>
+                    </h2>
+                </div>
+
+                <p>
+                    Comments
+                    <span class="label label-primary"><?= number_format($influencer->comments()->count()); ?></span>
+                </p>
+
+                <div id="comments-container" data-relation="influencers" data-id="<?= $influencer->getKey(); ?>"></div>
+
+                <?php
+                if ($costings = $influencer->costings()) {
+                    ?>
+                    <div class="page-header">
+                        <h2>Costings</h2>
+                    </div>
+
+                    <div class="row">
+                        <?php
+                        foreach ($costings as $costing) {
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    <?= HTML::text($costing['platform']); ?>:<br>
+                                    <em class="highlight">£<?= number_format($costing['price']); ?></em>
+                                    <?php
+                                    if ($costing['negotiable']) {
+                                        echo '<small>(Negotiable)</small>';
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                    <?php
+                }
+                ?>
+
+                <div class="page-header">
+                    <h2>Work</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <p>
+                            Total campaigns worked on:<br>
+                            <em class="highlight"><?= number_format($influencer->totalCampaigns()); ?></em>
+                        </p>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <p>
+                            Total posts:<br>
+                            <em class="highlight"><?= number_format($influencer->totalPosts()); ?></em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <?php
+            foreach ($channels as $channel) {
+                ?>
+                <div class="tab-pane" id="channel-<?= $channel->getKey(); ?>">
+                    <div class="page-header">
+                        <h2>
+                            <a href="<?= HTML::attr($channel->url); ?>" target="_blank"><?= HTML::text($channel->username ?: $channel->name); ?></a>
+                            <?php
+                            if ($channel->error !== null) {
+                                ?>
+                                <span class="label label-danger" data-toggle="tooltip" title="<?= Html::attr($channel->error); ?>"><i class="fa fa-exclamation"></i></span>
+                                <?php
+                            }
+                            ?>
+                            <span class="pull-right text-light"><?= HTML::text($channel->name); ?></span>
+                        </h2>
+                    </div>
+
+                    <div class="row">
+                        <?php
+                        foreach ($channel->getMetrics(['Number', 'Percent']) as $id => $value) {
+                            $metric = Metric::find($id);
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    <?= HTML::text($metric->name); ?>:<br>
+                                    <em class="highlight"><?= Number::formatMetric($metric, $value); ?></em>
+                                </p>
+                            </div>
+                            <?php
+                        }
+
+                        foreach ($channel->campaignStats(['Number', 'Percent']) as $id => $value) {
+                            $metric = Metric::find($id);
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    <?= HTML::text($metric->name); ?>:<br>
+                                    <em class="highlight"><?= Number::formatMetric($metric, $value); ?></em>
+                                </p>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+
+                    <div class="page-header">
+                        <h2>Costings</h2>
+                    </div>
+
+                    <div class="row">
+                        <?php
+                        if ($channel->price) {
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    Price:<br>
+                                    <em class="highlight">£<?= number_format($channel->price); ?></em>
+                                    <?php
+                                    if ($channel->negotiable) {
+                                        echo '<small>(Negotiable)</small>';
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+                            <?php
+                        }
+
+                        foreach ($channel->getMetrics(['Money']) as $id => $value) {
+                            $metric = Metric::find($id);
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    <?= HTML::text($metric->name); ?>:<br>
+                                    <em class="highlight"><?= Number::formatMetric($metric, $value); ?></em>
+                                </p>
+                            </div>
+                            <?php
+                        }
+
+                        foreach ($channel->campaignStats(['Money']) as $id => $value) {
+                            $metric = Metric::find($id);
+                            ?>
+                            <div class="col-sm-4">
+                                <p>
+                                    <?= HTML::text($metric->name); ?>:<br>
+                                    <em class="highlight"><?= Number::formatMetric($metric, $value); ?></em>
+                                </p>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+
+                    <?php
+                    if ($channel->totalCampaigns() > 0) {
+                        ?>
+                        <div class="page-header">
+                            <h2>Work</h2>
+                        </div>
+
+                        <p><strong>Previous campaigns:</strong></p>
+
+                        <div class="row">
+                            <?php
+                            foreach ($channel->allCampaigns() as $campaign) {
+                                ?>
+                                <div class="col-sm-4">
+                                    <p><?= HTML::text($campaign->client); ?></p>
+                                </div>
+                                <?php
+                            }
+                            ?>
+                        </div>
+                        <?php
+                    }
+
+                    if ($channel->demographics) {
+                        $genders   = $channel->getDemographics(Demographic::GENDER);
+                        $ages      = $channel->getDemographics(Demographic::AGE_GROUP);
+                        $countries = $channel->getDemographics(Demographic::COUNTRY);
+                        ?>
+                        <div class="page-header">
+                            <h2>Audience demographics</h2>
+                        </div>
+
+                        <div class="row">
+                            <?php
+                            if (! empty($genders)) {
+                                $male   = ($genders['Male'] ?? 0);
+                                $female = ($genders['Female'] ?? 0);
+                                ?>
+                                <div class="col-sm-4">
+                                    <p><strong>Gender split:</strong></p>
+
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <i class="fa fa-fw fa-circle male"></i>
+                                            Male: <span class="text-light"><?= $male; ?>%</span>
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-fw fa-circle female"></i>
+                                            Female: <span class="text-light"><?= $female; ?>%</span>
+                                        </li>
+                                    </ul>
+
+                                    <div class="row">
+                                        <div class="col-sm-8 col-sm-offset-2">
+                                            <svg width="100%" height="100%" viewBox="0 0 42 42" class="donut">
+                                                <circle cx="21" cy="21" r="15.91549430918954" fill="#FFFFFF"></circle>
+                                                <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FDB452" stroke-width="5"></circle>
+                                                <circle stroke-linecap="round" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#34657D" stroke-width="5" stroke-dasharray="<?= $male; ?> <?= (100 - $male); ?>" stroke-dashoffset="25"></circle>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                            ?>
+
+                            <?php
+                            if (! empty($ages)) {
+                                ?>
+                                <div class="col-sm-8">
+                                    <p><strong>Age split:</strong></p>
+
+                                    <div class="bar-chart">
+                                        <?php
+                                        foreach ($ages as $group => $percent) {
+                                            ?>
+                                            <div class="row no-gutter">
+                                                <div class="col-sm-2 text-right">
+                                                    <span class="group"><?= HTML::text($group); ?></span>
+                                                </div>
+
+                                                <div class="col-sm-10">
+                                                    <span class="bar text-light" style="width: <?= $percent; ?>%"><?= $percent; ?>%</span>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                            ?>
+                        </div>
+
+                        <div class="row">
+                            <?php
+                            if (! empty($countries)) {
+                                arsort($countries, SORT_NUMERIC);
+                                ?>
+                                <div class="col-sm-4">
+                                    <p><strong>Location:</strong></p>
+
+                                    <table class="table table-condensed table-unstyled">
+                                        <thead>
+                                        <tr>
+                                            <th>Country:</th>
+                                            <th>Fans:</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        foreach ($countries as $country => $percent) {
+                                            ?>
+                                            <tr>
+                                                <td><?= HTML::text($country); ?></td>
+                                                <td class="text-primary"><?= $percent; ?>%</td>
+                                            </tr>
+                                            <?php
+                                        }
+                                        ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php
+                            }
+                            ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+    </div>
+</div>
+
+<script src="<?= CacheBuster::getPath('/js/comments.js'); ?>"></script>
+<script>
+    $(function () {
+        var $tabs = $('#channel-tabs');
+
+        $tabs.find('a:first').tab('show');
+
+        $tabs.find('> li > a').on('show.bs.tab', function (event) {
+            $('#channel-tabs')
+                .removeClass('border-' + $(event.relatedTarget).attr('data-platform'))
+                .addClass('border-' + $(event.target).attr('data-platform'));
+        });
+    });
+</script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

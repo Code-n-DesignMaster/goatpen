@@ -1,0 +1,185 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\Utilities\Text;
+use GoatPen\ViewHelpers\{ActionsNavigation, Number};
+use GoatPen\{Channel, Metric};
+use LaravelGems\Escape\HTML;
+
+$actions = new ActionsNavigation;
+
+if ($campaign) {
+    $actions->add('Campaign builder', '/campaigns/' . $campaign->getKey() . '/builder', 'arrow-circle-left');
+}
+
+$actions->add('Filter', '#filters', 'filter', ['data-toggle' => 'collapse']);
+$actions->add('Add new', '/influencers/new', 'plus');
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Influencers',
+    'actions'   => $actions,
+]);
+
+echo $this->fetch('/partials/search/influencers.phtml', [
+    'filters'  => $filters,
+    'campaign' => $campaign,
+]);
+
+$filterDescription = $filters->description();
+
+if ($filterDescription !== false) {
+    echo '<p class="lead">' . $filterDescription . '</p>';
+}
+
+$paginator->display();
+?>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <?php
+            if ($campaign) {
+                ?>
+                <th style="width: 1rem;"></th>
+                <?php
+            }
+            ?>
+            <th>Name</th>
+            <th>Handle</th>
+            <th>Gender</th>
+            <th>Age</th>
+            <th>Country</th>
+            <th>Platform</th>
+            <th>Tag</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Following</th>
+            <?php
+            foreach ($filters->metrics as $criteria) {
+                if (in_array($criteria['id'], Metric::FOLLOWINGS)) {
+                    continue;
+                }
+                ?>
+                <th class="text-right"><?= HTML::text(Metric::find($criteria['id'])->name); ?></th>
+                <?php
+            }
+            ?>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($influencers->get() as $influencer) {
+            $channel    = Channel::find($influencer->channel_id);
+            $inCampaign = ($channel && $campaign && $channel->inCampaign($campaign));
+            ?>
+            <tr class="<?= ($inCampaign ? 'success' : ''); ?>">
+                <?php
+                if ($campaign) {
+                    ?>
+                    <td style="width: 1rem;">
+                        <?php
+                        if ($channel && ! $inCampaign) {
+                            ?>
+                            <a href="#"
+                               class="add-to-campaign"
+                               data-campaign="<?= $campaign->getKey(); ?>"
+                               data-channel="<?= $channel->getKey(); ?>"
+                               data-toggle="tooltip"
+                               title="Add to '<?= HTML::attr($campaign->name); ?>' campaign">
+                                <i class="fa fa-plus fa-lg"></i>
+                            </a>
+                            <?php
+                        }
+                        ?>
+                    </td>
+                    <?php
+                }
+                ?>
+                <td><a href="/influencers/<?= HTML::attr($influencer->id); ?>"><?= HTML::text($influencer->name); ?></a></td>
+                <td>
+                    <?php
+                    if ($channel) {
+                        echo sprintf(
+                            '<a href="%s" target="_blank">%s</a>',
+                            HTML::attr($channel->url),
+                            HTML::text($channel->username)
+                        );
+
+                        if ($channel->error !== null) {
+                            ?>
+                            <span class="label label-danger" data-toggle="tooltip" title="<?= Html::attr($channel->error); ?>"><i class="fa fa-exclamation"></i></span>
+                            <?php
+                        }
+                    }
+                    ?>
+                </td>
+                <td><?= HTML::text($influencer->gender); ?></td>
+                <td><?= HTML::text($influencer->age_group); ?></td>
+                <td><?= HTML::text($influencer->location); ?></td>
+                <td>
+                    <?php
+                    if ($channel) {
+                        ?>
+                        <span data-toggle="tooltip" data-placement="right" title="<?= HTML::attr($channel->platform->name); ?>">
+                            <img src="/images/socials/<?= Text::asUri($channel->platform->name); ?>-on.png" width="18" height="18" alt="<?= HTML::attr($channel->platform->name); ?>">
+                        </span>
+                        <?php
+                    }
+                    ?>
+                </td>
+                <td><?= HTML::text($influencer->primary_tag); ?></td>
+                <td class="text-right">
+                    <?php
+                    if ($channel && $channel->price) {
+                        echo '£' . number_format($channel->price, 2);
+                    }
+                    ?>
+                </td>
+                <td class="text-right">
+                    <?php
+                    if ($channel && ($following = $channel->following())) {
+                        echo number_format($following);
+                    }
+                    ?>
+                </td>
+                <?php
+                foreach ($filters->metrics as $criteria) {
+                    if (in_array($criteria['id'], Metric::FOLLOWINGS)) {
+                        continue;
+                    }
+                    ?>
+                    <td class="text-right">
+                        <?php
+                        $metric = Metric::find($criteria['id']);
+
+                        switch ($metric->scope) {
+                            case 'Influencer':
+                                echo Number::formatMetric($metric, $channel->metrics[$metric->id]);
+                                break;
+                            case 'Campaign':
+                                $range = $channel->metricRange($metric);
+
+                                if (count($range) === 2) {
+                                    $range = array_map(function ($value) use ($metric) {
+                                        return Number::formatMetric($metric, $value);
+                                    }, array_unique($range));
+
+                                    echo implode(' - ', $range);
+                                }
+                                break;
+                        }
+                        ?>
+                    </td>
+                <?php
+                }
+                ?>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?php $paginator->display(); ?>
+
+<script src="<?= CacheBuster::getPath('/js/influencers.js'); ?>"></script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

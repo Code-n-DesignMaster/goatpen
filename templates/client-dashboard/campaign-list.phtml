@@ -1,0 +1,75 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\{ActionsNavigation, FormElement, Tag};
+use GoatPen\{Platform, Session};
+use LaravelGems\Escape\HTML;
+
+//in: $campaigns
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Your campaigns',
+]);
+if ($campaigns) { 
+?>
+	<div class="live-title-row">
+		<p class="chart-name">LIVE</p>
+	</div>
+	<div class="list-row">
+		<?php
+			foreach ($campaigns as $campaign) {
+				if ($campaign["date"] >= date("Y-m-d")) {
+					list($year, $month, $day) = explode("-", $campaign["date"]);
+					echo '<a href="/dashboard/'.$campaign['slug'].'">';
+					echo '<div class="list-item">';
+					if ($campaign['thumbnail'] !== NULL)
+						echo '<img src="'.$campaign['thumbnail'].'" width="100%">';
+					else
+						echo '<img src="./images/live.png" width="100%">';
+					echo '<div class="list-live-title">';
+					echo '<p class="list-title-text">'.$campaign['name'].'</p>';
+					echo '<p class="list-title-date">'.$day.'.'.$month.'.'.$year.'</p>';
+					echo '</div>';
+					echo '</div>';
+					echo '</a>';
+				}
+			}
+		?>
+	</div>
+	<div class="completed-title-row">
+		<p class="chart-name">COMPLETED</p>
+	</div>
+	<div class="list-row">
+		<?php
+			foreach ($campaigns as $campaign) {
+				if ($campaign["date"] < date("Y-m-d")) {
+					list($year, $month, $day) = explode("-", $campaign["date"]);
+					echo '<a href="/dashboard/'.$campaign['slug'].'">';
+					echo '<div class="list-item">';
+					if ($campaign['thumbnail'] !== NULL)
+						echo '<img src="'.$campaign['thumbnail'].'" width="100%">';
+					else
+						echo '<img src="./images/live.png" width="100%">';
+					echo '<div class="list-completed-title">';
+					echo '<p class="list-title-text">'.$campaign['name'].'</p>';
+					echo '<p class="list-title-date">'.$day.'.'.$month.'.'.$year.'</p>';
+					echo '</div>';
+					echo '</div>';
+					echo '</a>';
+				}
+			}
+		?>
+	</div>
+<?php 
+} else { ?>
+	<div class="nopage-container">
+		<div class="nopage-content">
+			<img src="./images/nopage.png" width="200px"/>
+			<p class="nopage-msg">It looks like you cannot currently access any of the campaigns.</p>
+			<p>Please check back later once we've got everything ready to go.</p>
+		</div>
+	</div>
+<?php } ?>
+
+
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

@@ -1,0 +1,1881 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\{ActionsNavigation, FormElement, Tag};
+use GoatPen\{Platform, Session};
+use LaravelGems\Escape\HTML;
+
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => HTML::text($data['campaign_name']),
+    'updatedAt' => [
+        'date' => date('d.m.Y', $updatedAt),
+        'time' => date('H:i', $updatedAt),
+    ]
+]);
+?>
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="client-page-row">
+            <p class="chart-name">TIMELINE</h2>
+            <p class="client-page-right">Status: 
+                <?php if ($data["end_date"] < date("Y-m-d"))
+                    echo '<span class="client-page-right-complete">COMPLETE</span>';
+                else
+                    echo '<span class="client-page-right-live">LIVE</span>';
+                ?>
+            </p>
+        </div>
+        <div class="row"  style="margin-right: 25px">
+            <div class="col-md-6">
+                <?php if (isset($data['objective'])): ?>
+                    <h4>OBJECTIVES</h4>
+                    <h5><?=$data['objective'] ?></h5>
+                <?php endif;?>    
+            </div>
+            <div class="col-md-6">
+                <?php if (isset($data['target_audience'])): ?>
+                    <h4 class="text-right">TARGET AUDIENCE</h4>
+                    <h5  class="text-right"><?= $data['target_audience'] ?></h5>
+                <?php endif;?>
+            </div>
+        </div>
+        <div class="client-page-content">
+            <div id="timeline">
+            </div>
+            <?php if (isset($data["budget_spent"])) { ?>
+            <div class="client-page-row">
+                <p class="chart-name">BUDGET SPEND</h2>
+            </div>
+            <div id="budgetspend">
+            </div>
+            <?php } ?>
+            <div class="client-page-row">
+            </div>
+            <ul class="nav nav-tabs border-goat client-nav" id="channel-tabs">
+                <li class="active">
+                    <a class="bg-client bg-goat" href="#overview" data-toggle="tab" data-platform="goat">OVERVIEW</a>
+                </li>
+                <li>
+                    <a class="bg-client bg-goat" href="#monthly" data-toggle="tab" data-platform="goat">MONTHLY</a>
+                </li>
+                <li>
+                    <a class="bg-client bg-goat" href="#weekly" data-toggle="tab" data-platform="goat">WEEKLY</a>
+                </li>
+                <li>
+                    <a class="bg-client bg-goat" href="#daily" data-toggle="tab" data-platform="goat">DAILY</a>
+                </li>
+            </ul>
+            <div class="tab-content nav-client-content">
+                <div class="tab-pane active" id="overview">
+                    <div class="row donut-pie-container">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="line-chart" id="story-line-chart">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="line-chart" id="video-line-chart">
+                            </div>
+                        </div>
+                    </div>
+					<!--
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="insight-tick height-auto">
+                                <div class="insight-breakdown-title">NOTES</div>
+                                <div class="notes-row">
+                                    <div class="notes-row-name">
+                                        Harry Hugo 17.21
+                                    </div>
+                                    <div class="notes-row-desc">
+                                        Hello my name is harry i am typing yes yes words.
+                                    </div>
+                                </div>
+                                <div class="notes-row">
+                                    <div class="notes-row-name">
+                                        Harry Hugo 17.21
+                                    </div>
+                                    <div class="notes-row-desc">
+                                        Hello my name is harry i am typing yes yes words.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					-->
+                    <?php if (isset($data['notes'])): ?>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="insight-tick height-auto">
+                                <div class="insight-breakdown-title">NOTES</div>
+                                <div class="notes-row">
+                                    <div class="notes-row-desc">
+                                        <?php
+                                            $notes = htmlspecialchars($data['notes']);
+                                            $bold = '/(\*{1,1})(\w*)(\*{1,1})/'; // (\*){1,1}\w*(\*){1,1}
+                                            $notes = preg_replace($bold, '<strong>\2</strong>', $notes);
+                                            $italic = '/(_{1,1})(\w*)(_{1,1})/'; // (\*){1,1}\w*(\*){1,1}
+                                            $notes = preg_replace($italic, '<em>\2</em>', $notes);
+                                            echo $notes;
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+					
+                </div>
+                <div class="tab-pane" id="monthly">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="view-date">
+                                <label for="bday-month">VIEW MONTH:</label>
+                                <input id="bday-month" type="month" name="bday-month" onchange="selMonth()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row donut-pie-container">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="line-chart" id="story-line-chart">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="line-chart" id="video-line-chart">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="weekly">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="view-date">
+                                <label for="bday-week">VIEW WEEK:</label>
+                                <input id="bday-week" type="week" name="bday-week" onchange="selWeek()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row donut-pie-container">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="line-chart" id="story-line-chart">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="line-chart" id="video-line-chart">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="daily">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="view-date">
+                                <label for="bday-date">VIEW DATE:</label>
+                                <input id="bday-date" type="date" name="bday-date" onchange="selDate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row donut-pie-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="client-page-right-row">
+            <p class="chart-name">TOP PERFORMING POSTS</h2>
+        </div>
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6';
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+        <?php
+            foreach ($data["top_performing_posts"] as $item) {
+                if (strpos($item, 'www.facebook.com')) { // Make embeded markup from facebook post url
+                    echo '<div class="fb-post" data-href="' . $item . '"></div>';
+                } else if (strpos($item, 'twitter.com')) { // Make embeded markup from twitter post url
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, 'https://publish.twitter.com/oembed?url=' . $item);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+                    $result = curl_exec($ch);
+                    curl_close($ch);
+                    $response = json_decode($result);
+                    echo $response->html;
+                } else if (strpos($item, 'www.youtube.com')) { // Make embeded markup from youtube post url
+                    echo '<div class="video-wrapper"><iframe src="' . $item . '?autoplay=1" frameborder="0" allowfullscreen></iframe></div>';
+                } else if (strpos($item, 'www.instagram.com')) {
+                    $options = array(
+                        CURLOPT_RETURNTRANSFER => true,   // return web page
+                        CURLOPT_HEADER         => false,  // don't return headers
+                        CURLOPT_FOLLOWLOCATION => true,   // follow redirects
+                        CURLOPT_MAXREDIRS      => 10,     // stop after 10 redirects
+                        CURLOPT_ENCODING       => "",     // handle compressed
+                        CURLOPT_USERAGENT      => "test", // name of client
+                        CURLOPT_AUTOREFERER    => true,   // set referrer on redirect
+                        CURLOPT_CONNECTTIMEOUT => 120,    // time-out on connect
+                        CURLOPT_TIMEOUT        => 120,    // time-out on response
+                    ); 
+                
+                    $ch = curl_init('https://api.instagram.com/oembed?url=' . $item);
+                    curl_setopt_array($ch, $options);
+                
+                    $content  = curl_exec($ch);
+                
+                    curl_close($ch);
+                    $response = json_decode($content);
+                    echo $response->html;
+                } else {
+                    echo '<div class="top-post-container"><a href="' . $item . '">'. $item . '</a></div>';
+                }
+            }
+            
+        ?>
+    </div>
+</div>
+
+<script src="/lib/d3.min.js"></script>
+<script>
+var g_parts = '<?= $data["start_date"]; ?>'.split('-');
+var g_begindate = new Date(g_parts[0], g_parts[1] - 1, g_parts[2]);
+
+g_parts = '<?= $data["end_date"]; ?>'.split('-');
+var g_enddate = new Date(g_parts[0], g_parts[1] - 1, g_parts[2]);
+
+var g_donutWidth = 0;
+var g_divWidth = 0;
+
+var config = <?php echo json_encode($config); ?>;
+var drawDonutPieChart = function (donutVals, containerID) {
+    //////////////////////// Dounut pie chart/////////////////////////////////
+	var element = d3.select('.donut-pie').node();
+	var donutWidth, donutHeight;
+    if (g_donutWidth == 0) {
+        donutWidth = element.getBoundingClientRect().width;
+        donutHeight = donutWidth;
+        g_donutWidth = donutWidth;
+    } else {
+        donutWidth = g_donutWidth;
+        donutHeight = donutWidth;
+    }
+	var	radius = Math.min(donutWidth, donutHeight) / 2,
+		dRadius = 20,
+		pieBackColor = "#d1d2d4",
+        greenColor = "#39b54a";
+
+	var svg = d3.selectAll('#' + containerID + ' .donut-pie')
+		.data(donutVals)
+		.append("svg")
+		.attr("width", donutWidth)
+		.attr("height", donutHeight);
+		
+	var container = svg.append("g");
+
+	var pie = d3.pie().value(function(d) { 
+			return d.val; 
+		});
+	var path = d3.arc()
+		.outerRadius(radius - 10)
+		.innerRadius(radius - 10 - dRadius);
+
+	// Draw donute pie
+	var arc = container.selectAll(".arc")
+		.data(function (d) {
+            var backColor = pieBackColor;
+            var color = d.color;
+            if (d.val >= 100) {
+                backColor = "#b5d6ba";
+                color = greenColor;
+            }
+            var val = 0;
+            val = d.val % 100;
+            if (val == 0 && d.val >= 100) val = 100;
+			return pie([{val: val, color: color}, {val: 100 - val, color: backColor}]);
+		})
+		.enter().append("g")
+		.attr("class", "arc");
+
+	arc.append("path")
+		.attr("d", path)
+		.attr("fill", function(d) {
+			return d.data.color;
+		});
+		
+	container.attr("transform", function (d) {
+            var val = 0;
+            val = d.val % 100;
+            if (val == 0 && d.val >= 100) val = 100;
+			if (val > 50)
+				return "translate(" + donutWidth / 2 + "," + donutHeight / 2 + ") rotate(180)";
+			else
+				return "translate(" + donutWidth / 2 + "," + donutHeight / 2 + ") rotate(-" + (50-val)/50*180 + ")";
+		});
+		
+	// Draw rounded corner
+	svg.append("circle")
+		.attr("cx", donutWidth / 2)
+		.attr("cy", donutHeight / 2 + radius - 10 - dRadius / 2)
+		.attr("r", dRadius / 2)
+		.attr("stroke", function (d) {
+			if (d.val > 0) {
+                if (d.val >= 100) return greenColor;
+                else return d.color;
+            }
+			else return pieBackColor;
+		})
+		.attr("fill", function (d) {
+			if (d.val > 0) {
+                if (d.val >= 100) return greenColor;
+                else return d.color;
+            }
+			else return pieBackColor;
+		});
+		
+	svg.append("circle")
+		.attr("cx", function (d) {
+            var val = 0;
+            val = d.val % 100;
+            if (val == 0 && d.val >= 100) val = 100;
+
+			var angle;
+			var x;
+			if (val > 50) {
+				angle = (val - 50) / 50 * Math.PI;
+				if (angle < Math.PI/2){
+					x = donutWidth / 2 + (radius - 10 - dRadius / 2) * Math.sin(angle);
+				} else {
+					x = donutWidth / 2 + (radius - 10 - dRadius / 2) * Math.sin(Math.PI - angle);
+				}
+			} else {
+				angle = val / 50 * Math.PI;
+				if (angle < Math.PI/2){
+					x = donutWidth / 2 - (radius - 10 - dRadius / 2) * Math.sin(angle);
+				} else {
+					x = donutWidth / 2 - (radius - 10 - dRadius / 2) * Math.sin(Math.PI - angle);
+				}
+			}
+			return x;
+		})
+		.attr("cy", function (d) {
+            var val = 0;
+            val = d.val % 100;
+            if (val == 0 && d.val >= 100) val = 100;
+
+			var angle;
+			if (val > 50) {
+				angle = (val - 50) / 50 * Math.PI;
+				if (angle < Math.PI/2){
+					return donutHeight / 2 - (radius - 10 - dRadius / 2) * Math.cos(angle);
+				} else {
+					return donutHeight / 2 + (radius - 10 - dRadius / 2) * Math.cos(Math.PI - angle);
+				}
+			} else {
+				angle = val / 50 * Math.PI;
+				if (angle < Math.PI/2){
+					return donutHeight / 2 + (radius - 10 - dRadius / 2) * Math.cos(angle);
+				} else {
+					return donutHeight / 2 - (radius - 10 - dRadius / 2) * Math.cos(Math.PI - angle);
+				}
+			}
+		})
+		.attr("r", dRadius / 2)
+		.attr("stroke", function (d) {
+			if (d.val > 0) {
+                if (d.val >= 100) return greenColor;
+                else return d.color;
+            }
+			else return pieBackColor;
+		})
+		.attr("fill", function (d) {
+			if (d.val > 0) {
+                if (d.val >= 100) return greenColor;
+                else return d.color;
+            }
+			else return pieBackColor;
+		});
+
+	// Draw labels
+	svg.append("text")
+		.attr("x", donutWidth / 2)
+		.attr("y", donutHeight / 2)
+		.style("text-anchor", "middle")
+		.style("fill", function (d) {
+            if (d.val >= 100) return "#39b54a";
+            else return "red";
+        })
+		.style("font-size", "20px")
+		.style("font-weight", "bold")
+		.text(function (d) {
+			return d.val + "%";
+		});
+		
+	svg.append("text")
+		.attr("x", donutWidth / 2)
+		.attr("y", donutHeight / 2 + 20)
+		.style("text-anchor", "middle")
+		.style("fill", "black")
+		.style("font-size", "20px")
+		.text("complete");
+}
+
+function getGraphMaxValueY(dataMaxY) {
+    if(dataMaxY < 10) return 10;
+    var t = Math.ceil(Math.log(dataMaxY)/Math.log(10))-1;
+    return Math.ceil(dataMaxY/Math.pow(10,t))*Math.pow(10,t);
+}
+
+//function drawLineChart(lineData, containerTab, containerID, chartTitle, beginDate=new Date(2018, 0, 1), endDate=new Date(2018, 5, 30), countMonths=6) {
+function drawLineChart(lineData, containerTab, containerID, chartTitle, beginDate, endDate, countMonths) {
+    ///////////////////////////////////////////Story Line chart///////////////////////////////////////////////
+	/*var lineData = [
+		{date: "2018-01-15", val: 500},
+		{date: "2018-01-20", val: 500},
+		{date: "2018-02-10", val: 2000},
+		{date: "2018-02-20", val: 3000},
+		{date: "2018-03-10", val: 3500}
+	];*/
+    var maxVal = 0;
+    lineData.forEach(function (item, index) {
+        if (item.val > maxVal)
+            maxVal = item.val;
+    });
+
+    $('#' + containerTab + ' #' + containerID).html('<p class="line-chart-title">' + chartTitle + '</p><p class="line-chart-desc">Timeline of view count</p>');
+	var lineMargin = {top: 20, right: 0, bottom: 10, left: 70},
+		element = d3.select('#' + containerID).node();
+    var divWidth;
+    if (g_divWidth == 0) {
+        divWidth = element.getBoundingClientRect().width;
+        g_divWidth = divWidth;
+    } else {
+        divWidth = g_divWidth;
+    }
+
+	var	divHeight = 300,
+		lineWidth = divWidth - lineMargin.left - lineMargin.right - 5,
+		lineHeight = divHeight - lineMargin.top - lineMargin.bottom,
+		// lineBeginDate = new Date(2018, 0, 1),
+        lineBeginDate = beginDate,
+		// lineEndDate = new Date(2018, 4, 30),
+        lineEndDate = endDate,
+		lineTickLabelWidth = 30,
+		lineMaxVal = getGraphMaxValueY(maxVal),
+		linePlotColor = "#ee7421",
+		lineColor = "#a7a9ac",
+		lineTickColor = "#231f20",
+        barBackColor = "#d1d2d4";
+		
+	var lineY = d3.scaleLinear()
+		.domain([0, lineMaxVal])
+		.range([lineHeight, 0]);
+
+	// parse the date / time
+	var parseTime = d3.timeParse("%Y-%m-%d");
+
+	var lineTimeScale = d3.scaleTime()
+		.domain([lineBeginDate, lineEndDate])
+		.range([0, lineWidth]);
+
+    // define the line
+	var valueline = d3.line()
+		.x(function(d) { return lineTimeScale(d.date); })
+		.y(function(d) { return lineY(d.val); });
+
+	var xLineTimeAxis = d3.axisBottom(lineTimeScale)
+        .ticks(countMonths + 1)
+		.tickSizeInner(-lineHeight)
+		.tickSizeOuter(0)
+		.tickFormat(d3.timeFormat("%B"));
+
+	var svg = d3.select('#' + containerTab + ' #' + containerID).append("svg")
+		.attr("width", lineWidth + lineMargin.left + lineMargin.right)
+		.attr("height", lineHeight + lineMargin.top + lineMargin.bottom + 30)
+	  .append("g")
+		.attr("transform", "translate(" + lineMargin.left + "," + lineMargin.top + ")");
+		
+	// format the data
+	lineData.forEach(function(d) {
+		d.date = parseTime(d.date);
+	});
+
+	// Add the valueline path.
+	svg.append("path")
+		.data([lineData])
+		.attr("stroke", lineColor)
+		.attr("fill", "none")
+		.attr("stroke-width", "2px")
+		.attr("d", valueline);
+	  
+	// Add the scatterplot
+	svg.selectAll("dot")
+		.data(lineData)
+		.enter().append("circle")
+		.attr("r", 2)
+		.attr("cx", function(d) { return lineTimeScale(d.date); })
+		.attr("cy", function(d) { return lineY(d.val); })
+		.attr("stroke", linePlotColor)
+		.attr("fill", linePlotColor);
+
+    if (countMonths == 0) {
+        tmp = 2;
+    } else {
+        tmp = countMonths * 2
+    }
+		
+	// Months axis
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + lineHeight + ")")
+		.call(xLineTimeAxis)
+	  .selectAll(".tick text")
+		.style("text-anchor", "middle")
+		.attr("x", lineWidth / tmp)
+		.attr("y", 10)
+		.style("fill", lineTickColor)
+		.style("font-size", "15px")
+		.style("font-style", "italic");
+		
+	// Divide line
+	svg.selectAll(".tick line")
+		.style("stroke", barBackColor);
+		
+	// Add the Y Axis
+	svg.append("g")
+		.call(d3.axisLeft(lineY).tickSizeInner(-20).tickSizeOuter(0).ticks(5))
+		.selectAll(".tick text")
+		.attr("y", 5)
+		.style("fill", lineTickColor)
+		.style("font-size", "15px")
+		.style("font-style", "italic");
+}
+
+function getGraphTitle(str) {
+    var frags = str.split('_');
+    for (i=0; i<frags.length; i++) {
+        frags[i] = frags[i].toUpperCase();
+    }
+    return frags.join(' ');
+}
+
+// Make containers of donut pies from $data
+//function makeDonutElements(containerID, beginDate = new Date(2018, 0, 1), endDate = new Date(2018, 5, 30)) {
+function makeDonutElements(containerID, beginDate, endDate) {
+    var donutContainer = $('#' + containerID + ' > .donut-pie-container');
+    
+    var metrics_over = <?= json_encode($data["metrics_overall"]); ?>;
+    htmlPart1 = '<div class="col-md-3"><div class="pie-header ';
+    htmlPart2 = '"><div class="pie-header-logo"><img class="';
+    htmlPart3 = '" src="';
+    htmlPart4 = '" /></div><div class="pie-header-content"><div class="pie-header-content-title">';
+    
+    htmlPart6 = '</div><div class="pie-header-content-promise">Promised:</div><div class="pie-header-content-promise-num">';
+    switch (containerID) {
+    case 'overview':
+        htmlPart5 = '</div><div class="pie-header-content-val pie-header-content-border">';
+        htmlPart7 = '</div></div></div><div class="donut-pie"></div></div>';
+        break;
+    case 'monthly':
+        htmlPart5 = '</div><div class="pie-header-content-val">';
+        htmlPart7 = '</div></div></div><div class="donut-pie"><p class="line-chart-desc">Completed this month</p></div></div>';
+        break;
+    case 'weekly':
+        htmlPart5 = '</div><div class="pie-header-content-val">';
+        htmlPart7 = '</div></div></div><div class="donut-pie"><p class="line-chart-desc">Completed this week</p></div></div>';
+        break;
+    case 'daily':
+        htmlPart5 = '</div><div class="pie-header-content-val">';
+        htmlPart7 = '</div></div></div></div>';
+        break;
+    }
+    
+    var metrics_day = <?= json_encode($data["metrics_by_day"]); ?>;
+    // Calculate metrics during overall
+    var metrics_calc = {
+        "total_posts": 0,
+        "instagram_posts": 0,
+        "instagram_stories": 0,
+        "twitter_posts": 0,
+        "facebook_posts": 0,
+        "youtube_videos": 0,
+        "snapchat_stories": 0,
+        "blog_posts": 0,
+        "twitch_streams": 0,
+        "musical.ly_posts": 0,
+        "live.ly_posts": 0,
+        "installs": 0,
+        "registrations": 0,
+        "depositors": 0,
+        "link_clicks": 0,
+        "total_engagements": 0,
+        "impressions": 0,
+        "video_views": 0,
+        "story_views": 0,
+        "cumulative_following": 0,
+        "reach": 0,
+        "saved": 0,
+        "post_likes": 0,
+        "post_comments": 0,
+        "shares": 0,
+        "retweets": 0,
+        "youtube_views": 0,
+        "screenshots": 0,
+        "taps": 0,
+        "replies": 0,
+        "subscribers": 0,
+        "post_dislikes": 0,
+        "hashtag_taps": 0,
+        "swipe_ups": 0,
+        "sticker_taps": 0,
+        "navigation": 0,
+        "taps_forward": 0,
+        "taps_back": 0,
+        "exited": 0,
+        "next_story": 0
+    };
+    var start = beginDate;
+    var end = endDate;
+    var startTime = start.getTime(), endTime = end.getTime();
+    var storyLineChartDatas = [];
+    var videoLineChartDatas = [];
+    var beginStoryVal = 0;
+    var beginVideoVal = 0;
+
+    //for(loopTime = startTime + 86400000; loopTime < endTime + 86400000; loopTime += 86400000)
+    for(loopMyDay = start; loopMyDay <= end; loopMyDay = new Date(loopMyDay.getFullYear(), loopMyDay.getMonth(), loopMyDay.getDate() + 1))
+    {
+        loopDay = new Date(loopMyDay.getFullYear(), loopMyDay.getMonth(), loopMyDay.getDate() + 1)
+        //var loopDay = new Date(loopTime);
+        if ((metrics_day[loopDay.toISOString().slice(0,10)]) && (loopMyDay >= g_begindate) && (loopMyDay <= g_enddate)) {
+            metrics_calc.total_posts += metrics_day[loopDay.toISOString().slice(0,10)].total_posts;
+            metrics_calc.instagram_posts += metrics_day[loopDay.toISOString().slice(0,10)].instagram_posts;
+            metrics_calc.instagram_stories += metrics_day[loopDay.toISOString().slice(0,10)].instagram_stories;
+            metrics_calc.twitter_posts += metrics_day[loopDay.toISOString().slice(0,10)].twitter_posts;
+            metrics_calc.facebook_posts += metrics_day[loopDay.toISOString().slice(0,10)].facebook_posts;
+            metrics_calc.youtube_videos += metrics_day[loopDay.toISOString().slice(0,10)].youtube_videos;
+            metrics_calc.snapchat_stories += metrics_day[loopDay.toISOString().slice(0,10)].snapchat_stories;
+            metrics_calc.blog_posts += metrics_day[loopDay.toISOString().slice(0,10)].blog_posts;
+            metrics_calc.twitch_streams += metrics_day[loopDay.toISOString().slice(0,10)].twitch_streams;
+            metrics_calc['musical.ly_posts'] += metrics_day[loopDay.toISOString().slice(0,10)]['musical.ly_posts'];
+            metrics_calc['live.ly_posts'] += metrics_day[loopDay.toISOString().slice(0,10)]['live.ly_posts'];
+            metrics_calc.installs += metrics_day[loopDay.toISOString().slice(0,10)].installs;
+            metrics_calc.registrations += metrics_day[loopDay.toISOString().slice(0,10)].registrations;
+            metrics_calc.depositors += metrics_day[loopDay.toISOString().slice(0,10)].depositors;
+            metrics_calc.link_clicks += metrics_day[loopDay.toISOString().slice(0,10)].link_clicks;
+            metrics_calc.total_engagements += metrics_day[loopDay.toISOString().slice(0,10)].total_engagements;
+            metrics_calc.impressions += metrics_day[loopDay.toISOString().slice(0,10)].impressions;
+            metrics_calc.video_views += metrics_day[loopDay.toISOString().slice(0,10)].video_views;
+            metrics_calc.story_views += metrics_day[loopDay.toISOString().slice(0,10)].story_views;
+            metrics_calc.cumulative_following += metrics_day[loopDay.toISOString().slice(0,10)].cumulative_following;
+            metrics_calc.reach += metrics_day[loopDay.toISOString().slice(0,10)].reach;
+            metrics_calc.saved += metrics_day[loopDay.toISOString().slice(0,10)].saved;
+            metrics_calc.post_likes += metrics_day[loopDay.toISOString().slice(0,10)].post_likes;
+            metrics_calc.post_comments += metrics_day[loopDay.toISOString().slice(0,10)].post_comments;
+            metrics_calc.shares += metrics_day[loopDay.toISOString().slice(0,10)].shares;
+            metrics_calc.retweets += metrics_day[loopDay.toISOString().slice(0,10)].retweets;
+            metrics_calc.youtube_views += metrics_day[loopDay.toISOString().slice(0,10)].youtube_views;
+            metrics_calc.screenshots += metrics_day[loopDay.toISOString().slice(0,10)].screenshots;
+            metrics_calc.taps += metrics_day[loopDay.toISOString().slice(0,10)].taps;
+            metrics_calc.replies += metrics_day[loopDay.toISOString().slice(0,10)].replies;
+            metrics_calc.subscribers += metrics_day[loopDay.toISOString().slice(0,10)].subscribers;
+            metrics_calc.post_dislikes += metrics_day[loopDay.toISOString().slice(0,10)].post_dislikes;
+            metrics_calc.hashtag_taps += metrics_day[loopDay.toISOString().slice(0,10)].hashtag_taps;
+            metrics_calc.swipe_ups += metrics_day[loopDay.toISOString().slice(0,10)].swipe_ups;
+            metrics_calc.sticker_taps += metrics_day[loopDay.toISOString().slice(0,10)].sticker_taps;
+            metrics_calc.navigation += metrics_day[loopDay.toISOString().slice(0,10)].navigation;
+            metrics_calc.taps_forward += metrics_day[loopDay.toISOString().slice(0,10)].taps_forward;
+            metrics_calc.taps_back += metrics_day[loopDay.toISOString().slice(0,10)].taps_back;
+            metrics_calc.exited += metrics_day[loopDay.toISOString().slice(0,10)].exited;
+            metrics_calc.next_story += metrics_day[loopDay.toISOString().slice(0,10)].next_story;
+
+            switch (containerID) {
+            case 'overview':
+                storyData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['overall_1']] + beginStoryVal};
+                videoData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['overall_2']] + beginVideoVal};
+                beginStoryVal = storyData.val;
+                beginVideoVal = videoData.val;
+                break;
+            case 'monthly':
+                storyData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['monthly_1']] + beginStoryVal};
+                videoData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['monthly_2']] + beginVideoVal};
+                beginStoryVal = storyData.val;
+                beginVideoVal = videoData.val;
+                break;
+            case 'weekly':
+                storyData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['weekly_1']] + beginStoryVal};
+                videoData = {date: loopDay.toISOString().slice(0,10), val: metrics_day[loopDay.toISOString().slice(0,10)][config['graph']['weekly_2']] + beginVideoVal};
+                beginStoryVal = storyData.val;
+                beginVideoVal = videoData.val;
+                break;
+            }
+            storyLineChartDatas.push(storyData);
+            videoLineChartDatas.push(videoData);
+        }
+    }
+    var containerContent = '';
+    var donutVals = [];
+    metrics_over.forEach(function (item) {
+        htmlPart6 = '</div><div class="pie-header-content-promise">' + item.commitment_level + ':</div><div class="pie-header-content-promise-num">';
+        switch (item.name) {
+        case 'total_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'total-header' + htmlPart2 + 'total-img' + htmlPart3 + '/images/total_posts.png';
+                containerContent += htmlPart4 + 'Total posts:';
+                containerContent += htmlPart5 + metrics_calc.total_posts.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'total-header' + htmlPart2 + 'total-img' + htmlPart3 + '/images/total_posts.png';
+                containerContent += htmlPart4 + 'Total posts:';
+                containerContent += htmlPart5 + metrics_calc.total_posts.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.total_posts / item.value * 100;
+            colVal = "#97afc1";
+            break;
+        case 'instagram_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'engage1-header' + htmlPart2 + 'engage1-img' + htmlPart3 + '/images/instagram_posts.png';
+                containerContent += htmlPart4 + 'Instagram posts:';
+                containerContent += htmlPart5 + metrics_calc.instagram_posts.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'engage1-header' + htmlPart2 + 'engage1-img' + htmlPart3 + '/images/instagram_posts.png';
+                containerContent += htmlPart4 + 'Instagram posts:';
+                containerContent += htmlPart5 + metrics_calc.instagram_posts.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.instagram_posts / item.value * 100;
+            colVal = "#667885";
+            break;
+        case 'instagram_stories':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'engage2-header' + htmlPart2 + 'engage2-img' + htmlPart3 + '/images/instagram_stories.png';
+                containerContent += htmlPart4 + 'Instagram story:';
+                containerContent += htmlPart5 + metrics_calc.instagram_stories.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'engage2-header' + htmlPart2 + 'engage2-img' + htmlPart3 + '/images/instagram_stories.png';
+                containerContent += htmlPart4 + 'Instagram story:';
+                containerContent += htmlPart5 + metrics_calc.instagram_stories.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.instagram_stories / item.value * 100;
+            colVal = "#4c5b66";
+            break;
+        case 'twitter_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'story-header' + htmlPart2 + 'story-img' + htmlPart3 + '/images/twitter_posts.png';
+                containerContent += htmlPart4 + 'Twitter posts:';
+                containerContent += htmlPart5 + metrics_calc.twitter_posts.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'story-header' + htmlPart2 + 'story-img' + htmlPart3 + '/images/twitter_posts.png';
+                containerContent += htmlPart4 + 'Twitter posts:';
+                containerContent += htmlPart5 + metrics_calc.twitter_posts.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.twitter_posts / item.value * 100;
+            colVal = "#2f3b44";
+            break;
+        case 'facebook_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/facebook_posts.png';
+                containerContent += htmlPart4 + 'Facebook posts:';
+                containerContent += htmlPart5 + metrics_calc.facebook_posts.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/facebook_posts.png';
+                containerContent += htmlPart4 + 'Facebook posts:';
+                containerContent += htmlPart5 + metrics_calc.facebook_posts.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.facebook_posts / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'youtube_videos':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/youtube_videos.png';
+                containerContent += htmlPart4 + 'Youtube videos:';
+                containerContent += htmlPart5 + metrics_calc.youtube_videos.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/youtube_videos.png';
+                containerContent += htmlPart4 + 'Youtube videos:';
+                containerContent += htmlPart5 + metrics_calc.youtube_videos.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.youtube_videos / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'snapchat_stories':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/snapchat_stories.png';
+                containerContent += htmlPart4 + 'Snapchat stories:';
+                containerContent += htmlPart5 + metrics_calc.snapchat_stories.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/snapchat_stories.png';
+                containerContent += htmlPart4 + 'Snapchat stories:';
+                containerContent += htmlPart5 + metrics_calc.snapchat_stories.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.snapchat_stories / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'blog_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/blog_posts.png';
+                containerContent += htmlPart4 + 'Blog posts:';
+                containerContent += htmlPart5 + metrics_calc.blog_posts.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/blog_posts.png';
+                containerContent += htmlPart4 + 'Blog posts:';
+                containerContent += htmlPart5 + metrics_calc.blog_posts.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.blog_posts / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'twitch_streams':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/twitch_streams.png';
+                containerContent += htmlPart4 + 'Twitch streams:';
+                containerContent += htmlPart5 + metrics_calc.twitch_streams.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/twitch_streams.png';
+                containerContent += htmlPart4 + 'Twitch streams:';
+                containerContent += htmlPart5 + metrics_calc.twitch_streams.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.twitch_streams / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'musical.ly_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/musical.ly_posts.png';
+                containerContent += htmlPart4 + 'Musical posts:';
+                containerContent += htmlPart5 + metrics_calc['musical.ly_posts'].toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/musical.ly_posts.png';
+                containerContent += htmlPart4 + 'Musical posts:';
+                containerContent += htmlPart5 + metrics_calc['musical.ly_posts'].toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc['musical.ly_posts'] / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'live.ly_posts':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/live.ly_posts.png';
+                containerContent += htmlPart4 + 'Live posts:';
+                containerContent += htmlPart5 + metrics_calc['live.ly_posts'].toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/live.ly_posts.png';
+                containerContent += htmlPart4 + 'Live posts:';
+                containerContent += htmlPart5 + metrics_calc['live.ly_posts'].toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc['live.ly_posts'] / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'installs':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/installs.png';
+                containerContent += htmlPart4 + 'Installs:';
+                containerContent += htmlPart5 + metrics_calc.installs.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/installs.png';
+                containerContent += htmlPart4 + 'Installs:';
+                containerContent += htmlPart5 + metrics_calc.installs.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.installs / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'registrations':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/registrations.png';
+                containerContent += htmlPart4 + 'Registrations:';
+                containerContent += htmlPart5 + metrics_calc.registrations.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/registrations.png';
+                containerContent += htmlPart4 + 'Registrations:';
+                containerContent += htmlPart5 + metrics_calc.registrations.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.registrations / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'depositors':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/depositors.png';
+                containerContent += htmlPart4 + 'Depositors:';
+                containerContent += htmlPart5 + metrics_calc.depositors.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/depositors.png';
+                containerContent += htmlPart4 + 'Depositors:';
+                containerContent += htmlPart5 + metrics_calc.depositors.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.depositors / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'link_clicks':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/link_clicks.png';
+                containerContent += htmlPart4 + 'Link clicks:';
+                containerContent += htmlPart5 + metrics_calc.link_clicks.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/link_clicks.png';
+                containerContent += htmlPart4 + 'Link clicks:';
+                containerContent += htmlPart5 + metrics_calc.link_clicks.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.link_clicks / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'total_engagements':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/total_engagements.png';
+                containerContent += htmlPart4 + 'Engagements:';
+                containerContent += htmlPart5 + metrics_calc.total_engagements.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/total_engagements.png';
+                containerContent += htmlPart4 + 'Engagements:';
+                containerContent += htmlPart5 + metrics_calc.total_engagements.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.total_engagements / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'impressions':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/impressions.png';
+                containerContent += htmlPart4 + 'Impressions:';
+                containerContent += htmlPart5 + metrics_calc.impressions.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/impressions.png';
+                containerContent += htmlPart4 + 'Impressions:';
+                containerContent += htmlPart5 + metrics_calc.impressions.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.impressions / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'video_views':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/video_views.png';
+                containerContent += htmlPart4 + 'Video views:';
+                containerContent += htmlPart5 + metrics_calc.video_views.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/video_views.png';
+                containerContent += htmlPart4 + 'Video views:';
+                containerContent += htmlPart5 + metrics_calc.video_views.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.video_views / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'story_views':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/story_views.png';
+                containerContent += htmlPart4 + 'Story views:';
+                containerContent += htmlPart5 + metrics_calc.story_views.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/story_views.png';
+                containerContent += htmlPart4 + 'Story views:';
+                containerContent += htmlPart5 + metrics_calc.story_views.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.story_views / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'cumulative_following':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Cumulative:';
+                containerContent += htmlPart5 + metrics_calc.cumulative_following.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Cumulative:';
+                containerContent += htmlPart5 + metrics_calc.cumulative_following.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.cumulative_following / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'reach':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Reach:';
+                containerContent += htmlPart5 + metrics_calc.reach.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Reach:';
+                containerContent += htmlPart5 + metrics_calc.reach.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.reach / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'saved':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Saved:';
+                containerContent += htmlPart5 + metrics_calc.saved.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Saved:';
+                containerContent += htmlPart5 + metrics_calc.saved.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.saved / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'post_likes':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Likes:';
+                containerContent += htmlPart5 + metrics_calc.post_likes.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Likes:';
+                containerContent += htmlPart5 + metrics_calc.post_likes.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.post_likes / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'post_comments':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Comments:';
+                containerContent += htmlPart5 + metrics_calc.post_comments.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Comments:';
+                containerContent += htmlPart5 + metrics_calc.post_comments.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.post_comments / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'shares':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Shares:';
+                containerContent += htmlPart5 + metrics_calc.shares.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Shares:';
+                containerContent += htmlPart5 + metrics_calc.shares.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.shares / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'retweets':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Retweets:';
+                containerContent += htmlPart5 + metrics_calc.retweets.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Retweets:';
+                containerContent += htmlPart5 + metrics_calc.retweets.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.retweets / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'youtube_views':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Youtube Views:';
+                containerContent += htmlPart5 + metrics_calc.youtube_views.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Youtube Views:';
+                containerContent += htmlPart5 + metrics_calc.youtube_views.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.youtube_views / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'screenshots':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Screenshots:';
+                containerContent += htmlPart5 + metrics_calc.screenshots.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Screenshots:';
+                containerContent += htmlPart5 + metrics_calc.screenshots.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.screenshots / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'taps':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps:';
+                containerContent += htmlPart5 + metrics_calc.taps.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps:';
+                containerContent += htmlPart5 + metrics_calc.taps.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.taps / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'replies':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Replies:';
+                containerContent += htmlPart5 + metrics_calc.replies.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Replies:';
+                containerContent += htmlPart5 + metrics_calc.replies.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.replies / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'subscribers':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Subscribers:';
+                containerContent += htmlPart5 + metrics_calc.subscribers.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Subscribers:';
+                containerContent += htmlPart5 + metrics_calc.subscribers.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.subscribers / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'post_dislikes':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Dislikes:';
+                containerContent += htmlPart5 + metrics_calc.post_dislikes.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Post Dislikes:';
+                containerContent += htmlPart5 + metrics_calc.post_dislikes.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.post_dislikes / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'hashtag_taps':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Hashtag Taps:';
+                containerContent += htmlPart5 + metrics_calc.hashtag_taps.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Hashtag Taps:';
+                containerContent += htmlPart5 + metrics_calc.hashtag_taps.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.hashtag_taps / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'swipe_ups':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Swipe Ups:';
+                containerContent += htmlPart5 + metrics_calc.swipe_ups.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Swipe Ups:';
+                containerContent += htmlPart5 + metrics_calc.swipe_ups.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.swipe_ups / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'sticker_taps':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Sticker Taps:';
+                containerContent += htmlPart5 + metrics_calc.sticker_taps.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Sticker Taps:';
+                containerContent += htmlPart5 + metrics_calc.sticker_taps.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.sticker_taps / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'navigation':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Navigation:';
+                containerContent += htmlPart5 + metrics_calc.navigation.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Navigation:';
+                containerContent += htmlPart5 + metrics_calc.navigation.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.navigation / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'taps_forward':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps Forward:';
+                containerContent += htmlPart5 + metrics_calc.taps_forward.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps Forward:';
+                containerContent += htmlPart5 + metrics_calc.taps_forward.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.taps_forward / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'taps_back':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps Back:';
+                containerContent += htmlPart5 + metrics_calc.taps_back.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Taps Back:';
+                containerContent += htmlPart5 + metrics_calc.taps_back.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.taps_back / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'exited':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Exited:';
+                containerContent += htmlPart5 + metrics_calc.exited.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Exited:';
+                containerContent += htmlPart5 + metrics_calc.exited.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.exited / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        case 'next_story':
+            switch (containerID) {
+            case 'overview':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Next Story:';
+                containerContent += htmlPart5 + metrics_calc.next_story.toLocaleString();
+                containerContent += htmlPart6 + item.value.toLocaleString() + htmlPart7;
+                break;
+            case 'monthly':
+            case 'weekly':
+            case 'daily':
+                containerContent += htmlPart1 + 'clicks-header' + htmlPart2 + 'clicks-img' + htmlPart3 + '/images/cumulative_following.png';
+                containerContent += htmlPart4 + 'Next Story:';
+                containerContent += htmlPart5 + metrics_calc.next_story.toLocaleString();
+                containerContent += htmlPart7;
+                break;
+            }
+            proVal = metrics_calc.next_story / item.value * 100;
+            colVal = "#ffbc5a";
+            break;
+        }
+        var donutVal = {val: Math.round(proVal), color: colVal};
+        donutVals.push(donutVal);
+    });
+
+    donutContainer.html(containerContent);
+
+    var countMon = endDate.getMonth() - beginDate.getMonth() + 1;
+    if (beginDate.getDate() > 15)
+        countMon = countMon - 1;
+    if (endDate.getDate() < 15)
+        countMon = countMon - 1;
+
+    if (containerID != 'daily') {
+        drawDonutPieChart(donutVals, containerID);
+        
+        switch (containerID) {
+        case 'overview':
+            drawLineChart(storyLineChartDatas, containerID, 'story-line-chart', getGraphTitle(config['graph']['overall_1']), beginDate, endDate, countMon);
+            drawLineChart(videoLineChartDatas, containerID, 'video-line-chart', getGraphTitle(config['graph']['overall_2']), beginDate, endDate, countMon);
+            break;
+        case 'monthly':
+            drawLineChart(storyLineChartDatas, containerID, 'story-line-chart', getGraphTitle(config['graph']['monthly_1']), beginDate, endDate, countMon);
+            drawLineChart(videoLineChartDatas, containerID, 'video-line-chart', getGraphTitle(config['graph']['monthly_2']), beginDate, endDate, countMon);
+            break;
+        case 'weekly':
+            drawLineChart(storyLineChartDatas, containerID, 'story-line-chart', getGraphTitle(config['graph']['weekly_1']), beginDate, endDate, countMon);
+            drawLineChart(videoLineChartDatas, containerID, 'video-line-chart', getGraphTitle(config['graph']['weekly_2']), beginDate, endDate, countMon);
+            break;
+        }
+    }
+}
+var parts = '<?= $data["start_date"]; ?>'.split('-');
+var begindate = new Date(parts[0], parts[1] - 1, parts[2]);
+if (parts[2] > 15)
+    beginMon = parts[1] + 1;
+else
+    beginMon = parts[1];
+
+parts = '<?= $data["end_date"]; ?>'.split('-');
+var enddate = new Date(parts[0], parts[1] - 1, parts[2]);
+if (parts[2] > 15)
+    endMon = parts[1];
+else
+    endMon = parts[1] - 1;
+
+countMon = endMon - beginMon + 1;
+
+makeDonutElements('overview', begindate, enddate);
+
+var curDay = new Date();
+var firstDay = new Date(curDay.getFullYear(), curDay.getMonth(), 1);
+var lastDay = new Date(curDay.getFullYear(), curDay.getMonth() + 1, 0);
+
+makeDonutElements('monthly', firstDay, lastDay);
+
+var first = curDay.getDate() - curDay.getDay() + 1; // First day is the day of the month - the day of the week
+var last = first + 6; // last day is the first day + 6
+
+firstDay = new Date(curDay.getFullYear(), curDay.getMonth(), first);
+lastDay = new Date(curDay.getFullYear(), curDay.getMonth(), last);
+
+makeDonutElements('weekly', firstDay, lastDay);
+
+makeDonutElements('daily', new Date(), new Date());
+
+var selMonth = function () {
+    var monthControl = document.querySelector('input[type="month"]');
+    var departs = monthControl.value.split('-');
+    var beginDate = new Date(departs[0], departs[1] - 1, 1);
+    var endDate = new Date(departs[0], departs[1], 0);
+    makeDonutElements('monthly', beginDate, endDate);
+}
+
+function dateFromWeekNumber(year, week) {
+    var d = new Date(year, 0, 1);
+    var dayNum = d.getDay();
+    var diff = --week * 7;
+
+    // If 1 Jan is Friday to Sunday, go to next week
+    if (!dayNum || dayNum > 4) {
+        diff += 7;
+    }
+
+    // Add required number of days
+    d.setDate(d.getDate() - d.getDay() + ++diff);
+    return d;
+}
+
+var selWeek = function () {
+    var weekControl = document.querySelector('input[type="week"]');
+    var departs = weekControl.value.split('-W');
+    var beginDate = dateFromWeekNumber(departs[0], departs[1]);
+    var endDate = new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate() + 6);
+    console.log(beginDate);
+    console.log(endDate);
+    makeDonutElements('weekly', beginDate, endDate);
+}
+
+var selDate = function () {
+    var dateControl = document.querySelector('input[type="date"]');
+    var departs = dateControl.value.split('-');
+    var begindate = new Date(departs[0], departs[1] - 1, departs[2]);
+    makeDonutElements('daily', begindate, begindate);
+}
+
+//function drawTimeLineChart(curDate = new Date(), beginDate = new Date(2018, 0, 1), endDate = new Date(2018, 5, 30), countMonths = 12) {
+function drawTimeLineChart(curDate, beginDate, endDate, countMonths) {
+    //////////////////////////////////////////////////TimeLine chart////////////////////////////////////////
+    var margin = {top: 20, right: 40, bottom: 20, left: 0},
+        dayLabelWidth = 120,
+        element = d3.select('#timeline').node();
+        chartWidth = element.getBoundingClientRect().width,
+        timeLineWidth = chartWidth - margin.left - margin.right - dayLabelWidth,
+        tickValHeight = 70,
+        barHeight = 50,
+        tickValRadius = 5,
+        barBackColor = "#d1d2d4",
+        barColor = "#ee7421";
+        
+    function datediff(first, second) {
+        // Take the difference between the dates and divide by milliseconds per day.
+        // Round to nearest whole number to deal with DST.
+        return Math.round((second-first)/(1000*60*60*24));
+    }
+
+    if (curDate > endDate) {
+        curDate = endDate;
+        timeLineWidth = chartWidth - margin.left - margin.right;
+        dayLabelWidth = 0;
+    }
+
+    var timeScale = d3.scaleTime()
+        .domain([beginDate, endDate])
+        .range([0, timeLineWidth]);
+
+    var xTimeAxis = d3.axisBottom(timeScale)
+        .ticks(countMonths + 1)
+        .tickSizeInner(10)
+        .tickSizeOuter(-10)
+        .tickFormat(d3.timeFormat("%B"));
+
+    var svg = d3.select("#timeline").append("svg")
+        .attr("width", chartWidth)
+        .attr("height", barHeight + margin.top + margin.bottom + tickValHeight)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Background bar chart
+    svg.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", timeScale(endDate))
+        .attr("height", barHeight)
+        .attr("fill", barBackColor);
+        
+    // Bar chart
+    svg.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", timeScale(curDate))
+        .attr("height", barHeight)
+        .attr("fill", barColor);
+
+    if (countMonths == 0) {
+        tmp = 2;
+    } else {
+        tmp = countMonths * 2
+    }
+
+    // Months axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + barHeight + ")")
+        .call(xTimeAxis)
+        .selectAll(".tick text")
+        .style("text-anchor", "middle")
+        .attr("x", timeLineWidth / tmp)
+        .attr("y", 10)
+        .style("fill", barBackColor)
+        .style("font-size", "15px");
+        
+    // Current date tick val display
+    // Vertical line
+    svg.append("line")
+        .attr("x1", timeScale(curDate))
+        .attr("y1", 0)
+        .attr("x2", timeScale(curDate))
+        .attr("y2", barHeight + 50)
+        .attr("stroke", "black")
+        .attr("stroke-width", "2px");
+    // Circle
+    svg.append("circle")
+        .attr("cx", timeScale(curDate))
+        .attr("cy", barHeight + 50 + tickValRadius)
+        .attr("r", tickValRadius)
+        .attr("stroke", "black")
+        .attr("stroke-width", "2px")
+        .attr("fill", "none");
+    // Tick val text
+    var formatTime = d3.timeFormat("%B %Y");
+    if (dayLabelWidth > 0) { // Curdate < Enddate
+        svg.append("text")
+            .attr("x", timeScale(curDate) + tickValRadius + 10)
+            .attr("y", barHeight + 50 + tickValRadius * 2)
+            .style("text-anchor", "start")
+            .style("fill", "black")
+            .style("font-size", "20px")
+            .text(curDate.getDate() + "th " + formatTime(curDate));
+    } else { // Curdate > Enddate
+        svg.append("text")
+            .attr("x", timeScale(curDate) - 160)
+            .attr("y", barHeight + 50 + tickValRadius * 2)
+            .style("text-anchor", "start")
+            .style("fill", "black")
+            .style("font-size", "20px")
+            .text(curDate.getDate() + "th " + formatTime(curDate));
+    }
+        
+    if (dayLabelWidth > 0) { // Curdate < Enddate
+        // Remain days label rect
+        svg.append("rect")
+            .attr("x", timeLineWidth + 5)
+            .attr("y", 0)
+            .attr("width", dayLabelWidth - 5)
+            .attr("height", barHeight)
+            .attr("fill", "#f6f6f6");
+            
+        // Remain days label
+        svg.append("text")
+            .attr("x", timeLineWidth + 5 + (dayLabelWidth - 5) / 2)
+            .attr("y", 25)
+            .style("text-anchor", "middle")
+            .style("fill", "#ee7421")
+            .style("font-size", "25px")
+            .style("font-weight", 900)
+            .text(datediff(curDate, endDate));
+        // Remain days label
+        svg.append("text")
+            .attr("x", timeLineWidth + 5 + (dayLabelWidth - 5) / 2)
+            .attr("y", 42)
+            .style("text-anchor", "middle")
+            .style("fill", "#231f20")
+            .style("font-size", "15px")
+            .text("days remaining");
+    }
+}
+
+drawTimeLineChart(new Date(), begindate, enddate, countMon);
+
+var drawBudgetSpendChart = function (budgetSpent, budgetTotal) {
+    ////////////////////////////////////////Budget spend////////////////////////////////////
+    if (budgetSpent > budgetTotal)
+        budgetSpent = budgetTotal;
+    var curBudget = budgetSpent,
+		barBudgetColor = "#31667e",
+		tickBeginEndColor = "#847b73",
+        margin = {top: 20, right: 40, bottom: 20, left: 0},
+		width = chartWidth - margin.left - margin.right;
+	var budgetScale = d3.scaleLinear()
+		.domain([0, budgetTotal])
+		.range([0, width]);
+
+	var svg = d3.select("#budgetspend").append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", barHeight + margin.top + margin.bottom + 20)
+	  .append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		
+	// Background bar chart
+	svg.append("rect")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", budgetScale(budgetTotal))
+		.attr("height", barHeight)
+		.attr("fill", barBackColor);
+		
+	// Bar chart
+	svg.append("rect")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", budgetScale(curBudget))
+		.attr("height", barHeight)
+		.attr("fill", barBudgetColor);
+
+    // Tick begin text
+	svg.append("text")
+		.attr("x", 0)
+		.attr("y", barHeight + 20 + tickValRadius * 2)
+		.style("text-anchor", "start")
+		.style("fill", tickBeginEndColor)
+		.style("font-size", "20px")
+		.style("font-weight", "bold")
+		.text("0%");
+		
+    if (Math.round(curBudget/budgetTotal*100) < 80) {
+        // Tick end text
+        svg.append("text")
+            .attr("x", width)
+            .attr("y", barHeight + 20 + tickValRadius * 2)
+            .style("text-anchor", "end")
+            .style("fill", tickBeginEndColor)
+            .style("font-size", "20px")
+            .style("font-weight", "bold")
+            .text("100%");
+    }
+
+	// Current budget tick val display
+	// Vertical line
+	svg.append("line")
+		.attr("x1", budgetScale(curBudget))
+		.attr("y1", 0)
+		.attr("x2", budgetScale(curBudget))
+		.attr("y2", barHeight + 20)
+		.attr("stroke", "black")
+		.attr("stroke-width", "2px");
+	// Circle
+	svg.append("circle")
+		.attr("cx", budgetScale(curBudget))
+		.attr("cy", barHeight + 20 + tickValRadius)
+		.attr("r", tickValRadius)
+		.attr("stroke", "black")
+		.attr("stroke-width", "2px")
+		.attr("fill", "none");
+    if (Math.round(curBudget/budgetTotal*100) >= 90) { // Left tick val text
+        // Tick val text
+        svg.append("text")
+            .attr("x", budgetScale(curBudget) - 60)
+            .attr("y", barHeight + 20 + tickValRadius * 2)
+            .style("text-anchor", "start")
+            .style("fill", "black")
+            .style("font-size", "20px")
+            .style("font-weight", "bold")
+            .text(Math.round(curBudget/budgetTotal*100) + "%");
+    } else { // Right tick val text
+        // Tick val text
+        svg.append("text")
+            .attr("x", budgetScale(curBudget) + tickValRadius + 10)
+            .attr("y", barHeight + 20 + tickValRadius * 2)
+            .style("text-anchor", "start")
+            .style("fill", "black")
+            .style("font-size", "20px")
+            .style("font-weight", "bold")
+            .text(Math.round(curBudget/budgetTotal*100) + "%");
+    }
+	
+}
+var budget_spent = <?= isset($data["budget_spent"]) ? $data["budget_spent"] : 'null' ?>;
+if (budget_spent !== null)
+    drawBudgetSpendChart(budget_spent, <?= $data["budget_total"]; ?>);
+
+</script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

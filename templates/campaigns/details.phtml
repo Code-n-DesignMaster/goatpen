@@ -1,0 +1,528 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\{ActionsNavigation, FormElement, Tag};
+use GoatPen\{Platform, Session};
+use LaravelGems\Escape\HTML;
+
+$actions = new ActionsNavigation;
+
+if ($campaign->exists) {
+    if (Session::getUser()->owner) {
+        $actions->add('History', '/campaigns/' . $campaign->id . '/history', 'history');
+    }
+
+    $actions->add('Import', '/campaigns/' . $campaign->id . '/import', 'upload');
+    $actions->add('Builder', '/campaigns/' . $campaign->id . '/builder', 'wrench');
+    $actions->add('Delete', '/campaigns/' . $campaign->id . '/delete', 'trash');
+}
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => ($campaign->exists ? 'Edit campaign' : 'New campaign'),
+    'actions'   => $actions,
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Main details</h3>
+        </div>
+
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">Name</label>
+
+                <div class="col-sm-10">
+                    <input class="form-control" name="name" id="name" placeholder="Name" value="<?= HTML::attr($campaign->name); ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="client" class="col-sm-2 control-label">Client</label>
+
+                <div class="col-sm-10">
+                    <input class="form-control" name="client" id="client" placeholder="Client" value="<?= HTML::attr($campaign->client); ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="budget" class="col-sm-2 control-label">Budget</label>
+
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-gbp"></i></span>
+                        <input class="form-control" name="budget" id="budget" placeholder="Budget" value="<?= HTML::attr($campaign->budget); ?>">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Tags</label>
+
+                <div class="col-sm-10">
+                    <ul class="list-unstyled" id="tags">
+                        <?php
+                        $tags   = ($campaign->tags ?? []);
+                        $tags[] = null;
+
+                        foreach ($tags as $tag) {
+                        ?>
+                            <li class="tag">
+                                <input class="form-control" name="tag[]" list="tags-list" value="<?= HTML::attr($tag); ?>">
+                            </li>
+                        <?php
+                        }
+                        ?>
+                    </ul>
+
+                    <datalist id="tags-list">
+                        <?php
+                        foreach (Tag::all() as $tag) {
+                        ?>
+                            <option value="<?= HTML::attr($tag); ?>">
+                        <?php
+                        }
+                        ?>
+                    </datalist>
+
+                    <p>
+                        <a class="btn btn-default" href="#" id="add-tag">
+                            <i class="fa fa-plus"></i>
+                            Add another tag
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Deliverables</label>
+
+                <div class="col-sm-10">
+                    <ul class="list-unstyled" id="metrics">
+                        <?php
+                        $key = 0;
+
+                        foreach (($campaign->deliverables ?: [null]) as $id => $quantity) {
+                            ?>
+                            <li class="metric row" data-count="<?= $key; ?>">
+                                <div class="col-sm-8">
+                                    <select class="form-control" name="deliverable[<?= $key; ?>][id]">
+                                        <option></option>
+                                        <?php
+                                        foreach ($statsMetrics as $metric) {
+                                            echo sprintf(
+                                                '<option value="%d" %s>%s</option>',
+                                                HTML::attr($metric->id),
+                                                ($id === $metric->id ? 'selected' : ''),
+                                                HTML::text($metric->name)
+                                            );
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <input type="number" min="0" step="0.01" class="form-control" name="deliverable[<?= $key; ?>][quantity]" value="<?= HTML::attr($quantity); ?>">
+                                </div>
+                            </li>
+                            <?php
+                            $key++;
+                        }
+                        ?>
+                    </ul>
+
+                    <p>
+                        <a class="btn btn-default" href="#" id="add-metric">
+                            <i class="fa fa-plus"></i>
+                            Add another deliverable
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Comments
+                <span class="label label-primary"><?= number_format($campaign->comments()->count()); ?></span>
+            </h3>
+        </div>
+
+        <div class="panel-body">
+            <div id="comments-container" data-relation="campaigns" data-id="<?= $campaign->getKey(); ?>"></div>
+        </div>
+    </div>
+
+    <div id="posts">
+        <?php
+        $count = 1;
+
+        foreach ($posts as $post) {
+            $post_id = ($post->exists ? $post->id : 'new_' . $count);
+            ?>
+            <div class="panel panel-default post <?= ($post->exists ? '' : 'hidden'); ?>" data-count="<?= $count; ?>">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Post #<span class="count"><?= $count; ?></span>
+
+                        <?php
+                        if ($post->exists) {
+                        ?>
+                            <a class="text-danger pull-right delete" href="/campaigns/<?= $campaign->id; ?>/posts/<?= $post_id; ?>/delete">
+                                Delete
+                            </a>
+                        <?php
+                        }
+                        ?>
+                    </h3>
+                </div>
+
+                <div class="panel-body">
+                    <?php
+                    if ($post->error !== null) {
+                        ?>
+                        <div class="alert alert-danger">
+                            <?= Html::text($post->error); ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Channel</label>
+
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                <span class="channel-description">
+                                    <?php
+                                    if ($post->exists) {
+                                        echo sprintf(
+                                            '%s \ %s [%s]',
+                                            HTML::text($post->channel->influencer->name),
+                                            HTML::text($post->channel->name),
+                                            HTML::text($post->channel->platform->name)
+                                        );
+                                    }
+                                    ?>
+                                </span>
+                                <input type="hidden" name="post[<?= $post_id; ?>][channel_id]" value="<?= $post->channel_id; ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="post_posted_<?= $post_id; ?>" class="col-sm-2 control-label">Posted</label>
+
+                        <div class="col-sm-10">
+                            <input type="date" class="form-control" name="post[<?= $post_id; ?>][posted]" id="post_posted_<?= $post_id; ?>" placeholder="Posted" value="<?= ($post->posted ? HTML::attr($post->posted->toDateString()) : null); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="post_url_<?= $post_id; ?>" class="col-sm-2 control-label">Live post URL</label>
+
+                        <div class="col-sm-10">
+                            <input class="form-control" name="post[<?= $post_id; ?>][url]" id="post_url_<?= $post_id; ?>" placeholder="URL" value="<?= HTML::attr($post->url); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="post_link_<?= $post_id; ?>" class="col-sm-2 control-label">Promoted URL</label>
+
+                        <div class="col-sm-10">
+                            <input class="form-control" name="post[<?= $post_id; ?>][link]" id="post_link_<?= $post_id; ?>" placeholder="URL" value="<?= HTML::attr($post->link); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group metrics <?= (! $post->channel ? 'hidden' : ''); ?>">
+                        <label class="col-sm-2 control-label">Metrics</label>
+
+                        <div class="col-sm-10">
+                            <ul class="list-inline">
+                                <?php
+                                foreach ($metrics as $metric) {
+                                    $platform_ids = $metric->platforms()->allRelatedIds()->toArray();
+                                    $visible      = ($post->channel && $post->channel->platform && in_array($post->channel->platform->id, $platform_ids));
+                                    ?>
+                                    <li class="col-sm-3 <?= ($visible ? '' : 'hidden'); ?>" data-platforms=",<?= implode(',', $platform_ids); ?>,">
+                                        <label for="post_<?= $post_id; ?>_metric_<?= $metric->id; ?>" class="control-label"><?= HTML::text($metric->name); ?></label>
+                                        <?php
+                                        if ($metric->type === 'Money' || $metric->type === 'Percent') {
+                                            echo '<div class="input-group">';
+                                        }
+
+                                        if ($metric->type === 'Money') {
+                                            echo '<span class="input-group-addon"><i class="fa fa-gbp"></i></span>';
+                                        }
+
+                                        $data = [
+                                            'type'  => 'number',
+                                            'min'   => 0,
+                                            'step'  => ($metric->type === 'Number' ? 1 : 0.01),
+                                            'class' => 'form-control',
+                                            'id'    => 'post_' . $post_id . '_metric_' . $metric->id,
+                                            'value' => ($post->metrics[$metric->id] ?? ''),
+                                        ];
+
+                                        if ($visible) {
+                                            $data['name'] = 'post[' . $post_id . '][metric][' . $metric->id . ']';
+                                        } else {
+                                            $data['data-name'] = 'post[' . $post_id . '][metric][' . $metric->id . ']';
+                                        }
+
+                                        echo FormElement::input($data);
+
+                                        if ($metric->type === 'Percent') {
+                                            echo '<span class="input-group-addon"><i class="fa fa-percent"></i></span>';
+                                        }
+
+                                        if ($metric->type === 'Money' || $metric->type === 'Percent') {
+                                            echo '</div>';
+                                        }
+                                        ?>
+                                    </li>
+                                <?php
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+            $count++;
+        }
+        ?>
+    </div>
+
+    <p>
+        <a class="btn btn-default" href="#" data-toggle="modal" data-target="#channel-search-modal">
+            <i class="fa fa-plus"></i>
+            Add another post
+        </a>
+    </p>
+
+    <div id="stats">
+        <?php
+        $count = 1;
+
+        foreach ($stats as $stat) {
+            $stat_id = ($stat->exists ? $stat->id : 'new_' . $count);
+            ?>
+            <div class="panel panel-default stat <?= ($stat->exists ? '' : 'hidden'); ?>" data-count="<?= $count; ?>">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Stat #<span class="count"><?= $count; ?></span>
+
+                        <?php
+                        if ($stat->exists) {
+                            ?>
+                            <a class="text-danger pull-right delete" href="/campaigns/<?= $campaign->id; ?>/stats/<?= $stat_id; ?>/delete">
+                                Delete
+                            </a>
+                            <?php
+                        }
+                        ?>
+                    </h3>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Channel</label>
+
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                <span class="channel-description">
+                                    <?php
+                                    if ($stat->exists) {
+                                        echo sprintf(
+                                            '%s \ %s [%s]',
+                                            HTML::text($stat->channel->influencer->name),
+                                            HTML::text($stat->channel->name),
+                                            HTML::text($stat->channel->platform->name)
+                                        );
+                                    }
+                                    ?>
+                                </span>
+                                <input type="hidden" name="stat[<?= $stat_id; ?>][channel_id]" value="<?= $stat->channel_id; ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stat_link_<?= $stat_id; ?>" class="col-sm-2 control-label">Promoted URL</label>
+
+                        <div class="col-sm-10">
+                            <input class="form-control" name="stat[<?= $stat_id; ?>][link]" id="stat_link_<?= $stat_id; ?>" placeholder="URL" value="<?= HTML::attr($stat->link); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stat_total_posts_<?= $stat_id; ?>" class="col-sm-2 control-label">Total posts</label>
+
+                        <div class="col-sm-10">
+                            <input class="form-control" type="number" name="stat[<?= $stat_id; ?>][total_posts]" id="stat_total_posts_<?= $stat_id; ?>" min="0" step="1" value="<?= HTML::attr($stat->total_posts); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stat_total_cost_<?= $stat_id; ?>" class="col-sm-2 control-label">Total cost</label>
+
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-gbp"></i></span>
+                                <input class="form-control" type="number" name="stat[<?= $stat_id; ?>][total_cost]" id="stat_total_cost_<?= $stat_id; ?>" min="0" step="0.01" value="<?= HTML::attr($stat->total_cost); ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group metrics <?= (! $stat->channel ? 'hidden' : ''); ?>">
+                        <label class="col-sm-2 control-label">Metrics</label>
+
+                        <div class="col-sm-10">
+                            <ul class="list-inline">
+                                <?php
+                                foreach ($statsMetrics as $metric) {
+                                    $platform_ids = $metric->platforms()->allRelatedIds()->toArray();
+                                    $visible      = ($stat->channel && $stat->channel->platform && in_array($stat->channel->platform->id, $platform_ids));
+                                    ?>
+                                    <li class="col-sm-3 <?= ($visible ? '' : 'hidden'); ?>" data-platforms=",<?= implode(',', $platform_ids); ?>,">
+                                        <label for="stat_<?= $stat_id; ?>_metric_<?= $metric->id; ?>" class="control-label"><?= HTML::text($metric->name); ?></label>
+                                        <?php
+                                        if ($metric->type === 'Money' || $metric->type === 'Percent') {
+                                            echo '<div class="input-group">';
+                                        }
+
+                                        if ($metric->type === 'Money') {
+                                            echo '<span class="input-group-addon"><i class="fa fa-gbp"></i></span>';
+                                        }
+
+                                        $data = [
+                                            'type'  => 'number',
+                                            'min'   => 0,
+                                            'step'  => ($metric->type === 'Number' ? 1 : 0.01),
+                                            'class' => 'form-control',
+                                            'id'    => 'stat_' . $stat_id . '_metric_' . $metric->id,
+                                            'value' => ($stat->metrics[$metric->id] ?? ''),
+                                        ];
+
+                                        if ($visible) {
+                                            $data['name'] = 'stat[' . $stat_id . '][metric][' . $metric->id . ']';
+                                        } else {
+                                            $data['data-name'] = 'stat[' . $stat_id . '][metric][' . $metric->id . ']';
+                                        }
+
+                                        echo FormElement::input($data);
+
+                                        if ($metric->type === 'Percent') {
+                                            echo '<span class="input-group-addon"><i class="fa fa-percent"></i></span>';
+                                        }
+
+                                        if ($metric->type === 'Money' || $metric->type === 'Percent') {
+                                            echo '</div>';
+                                        }
+                                        ?>
+                                    </li>
+                                    <?php
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+            $count++;
+        }
+        ?>
+    </div>
+
+    <p>
+        <a class="btn btn-default" href="#" data-toggle="modal" data-target="#channel-search-modal">
+            <i class="fa fa-plus"></i>
+            Add another stat
+        </a>
+    </p>
+
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="channel-search-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times"></i></button>
+                <h4 class="modal-title">Channel search</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="search-name">Influencer</label>
+
+                        <div class="col-sm-8">
+                            <input class="form-control" id="search-influencer" placeholder="Influencer name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="search-platform">Platform</label>
+
+                        <div class="col-sm-8">
+                            <select class="form-control" id="search-platform">
+                                <option></option>
+                                <?php
+                                foreach (Platform::query()->orderBy('order', 'asc')->get() as $platform) {
+                                    echo sprintf(
+                                        '<option value="%d">%s</option>',
+                                        HTML::attr($platform->id),
+                                        HTML::attr($platform->name)
+                                    );
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-8">
+                            <button type="button" class="btn btn-default" id="search-go">Search</button>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="search-results">Search results</label>
+
+                        <div class="col-sm-8">
+                            <select class="form-control" id="search-results"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-8">
+                            <button type="button" class="btn btn-primary" id="search-add-post">Add post to campaign</button>
+                            <button type="button" class="btn btn-primary" id="search-add-stat">Add stat to campaign</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="<?= CacheBuster::getPath('/js/campaign.js'); ?>"></script>
+<script src="<?= CacheBuster::getPath('/js/tags.js'); ?>"></script>
+<script src="<?= CacheBuster::getPath('/js/metrics.js'); ?>"></script>
+<script src="<?= CacheBuster::getPath('/js/comments.js'); ?>"></script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

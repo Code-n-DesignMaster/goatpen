@@ -1,0 +1,2 @@
+$(function(){$(".add-to-campaign").on("click",function(a){a.preventDefault();var n=$(this),t=$.post("/campaigns/"+$(this).attr("data-campaign")+"/builder/add-channel",{channel_id:$(this).attr("data-channel")});t.fail(function(){window.alert("There was an error adding the channel to the campaign")}),t.done(function(){n.parents("tr").addClass("success"),n.tooltip("hide"),n.remove()})})});
+//# sourceMappingURL=./influencers-min.js.map

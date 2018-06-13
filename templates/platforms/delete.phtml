@@ -1,0 +1,31 @@
+<?php
+use GoatPen\Formatters\Phrasing;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Delete platform',
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <p class="lead">Are you sure you want to delete platform '<?= HTML::text($platform->name); ?>'?</p>
+
+    <p>Consequences:</p>
+
+    <ul>
+        <li><?= Phrasing::plural($platform->channels->count(), 'channel'); ?> (and any associated posts) will be deleted</li>
+    </ul>
+
+    <hr>
+
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-danger">Delete</button>
+            or <a href="/platforms/<?= $platform->id; ?>/edit">cancel</a>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

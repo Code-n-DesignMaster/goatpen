@@ -1,0 +1,60 @@
+<?php
+use Carbon\Carbon;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Import campaign history',
+]);
+?>
+
+<table class="table table-condensed" id="campaign-import-history">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>User</th>
+            <th>Log</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($queues as $queue) {
+        ?>
+            <tr>
+                <td class="text-nowrap">
+                    <?php
+                    if ($queue->completed) {
+                    ?>
+                        Completed<br>
+                        <small class="text-muted">
+                            on <?= HTML::text($queue->completed->timezone('Europe/London')->format('j M Y, H:i')); ?>
+                        </small>
+                    <?php
+                    } elseif ($queue->started) {
+                    ?>
+                        Running…<br>
+                        <small class="text-muted">
+                            for <?= HTML::text($queue->started->diffForHumans(Carbon::now(), true)); ?>
+                        </small>
+                    <?php
+                    } else {
+                    ?>
+                        Queued<br>
+                        <small class="text-muted">
+                            on <?= HTML::text($queue->queued->timezone('Europe/London')->format('j M Y, H:i')); ?>
+                        </small>
+                    <?php
+                    }
+                    ?>
+                </td>
+                <td class="text-nowrap"><?= HTML::text($queue->user->name); ?></td>
+                <td>
+                    <pre class="pre-scrollable no-padding no-border no-background"><?= HTML::text($queue->log); ?></pre>
+                </td>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

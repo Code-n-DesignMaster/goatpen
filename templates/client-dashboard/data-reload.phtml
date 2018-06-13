@@ -1,0 +1,23 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\{ActionsNavigation, FormElement, Tag};
+use GoatPen\{Platform, Session};
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Reloading Google Sheets Client Data',
+]);
+?>
+
+<p>These Google Sheets tabs were processed:<p>
+<ul>
+<?php
+foreach($tabs as $tab){
+?>
+	<li><?= $tab; ?></li>
+<?php
+}
+?>
+</ul>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

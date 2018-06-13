@@ -1,0 +1,36 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+$actions = new ActionsNavigation;
+
+if ($platform->exists) {
+    $actions->add('History', '/platforms/' . $platform->id . '/history', 'history');
+    $actions->add('Delete', '/platforms/' . $platform->id . '/delete', 'trash');
+}
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => ($platform->exists ? 'Edit platform' : 'New platform'),
+    'actions'   => $actions,
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+
+        <div class="col-sm-10">
+            <input class="form-control" name="name" id="name" placeholder="Name" value="<?= HTML::attr($platform->name); ?>" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-default">Save</button>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

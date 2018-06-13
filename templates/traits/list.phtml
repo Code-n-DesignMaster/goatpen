@@ -1,0 +1,34 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Traits',
+    'actions'   => (new ActionsNavigation)->add('Add new', '/traits/new', 'plus'),
+]);
+?>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($traits as $trait) {
+        ?>
+            <tr>
+                <td>
+                    <a href="/traits/<?= HTML::attr($trait->getKey()); ?>/edit"><?= HTML::text($trait->name); ?></a>
+                </td>
+                <td><?= HTML::text($trait->description); ?></td>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

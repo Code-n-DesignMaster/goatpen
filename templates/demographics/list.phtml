@@ -1,0 +1,32 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Demographics',
+    'actions'   => (new ActionsNavigation)->add('Add new', '/demographics/new', 'plus'),
+]);
+?>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($demographics as $demographic) {
+            ?>
+            <tr>
+                <td>
+                    <a href="/demographics/<?= $demographic->getKey(); ?>/edit"><?= HTML::text($demographic->name); ?></a>
+                </td>
+            </tr>
+            <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

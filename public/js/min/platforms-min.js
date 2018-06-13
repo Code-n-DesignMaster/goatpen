@@ -1,0 +1,2 @@
+$(function(){var t=$("#platforms");t.find("tbody tr").css("cursor","row-resize"),t.find("tbody").sortable({axis:"y",cursor:"row-resize",helper:function(t,r){return r.children().each(function(){$(this).width($(this).width()).height($(this).height())}),r},opacity:.6,stop:function(){$.post("/platforms/order",{id:t.find("tbody").sortable("toArray",{attribute:"data-id"})})}})});
+//# sourceMappingURL=./platforms-min.js.map

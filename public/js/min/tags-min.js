@@ -1,0 +1,2 @@
+$(function(){$("#add-tag").on("click",function(n){n.preventDefault();var t=$(".tag:last").clone();t.find("select").val(0),$("#tags").append(t),t.find("input").focus()})});
+//# sourceMappingURL=./tags-min.js.map

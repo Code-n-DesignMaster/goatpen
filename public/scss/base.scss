@@ -1,0 +1,358 @@
+@import 'bourbon';
+@import 'colours';
+
+body {
+  padding-top: 70px;
+}
+
+#page-content {
+  margin-top: 20px;
+}
+
+h1, .h1 {
+  text-transform: uppercase;
+
+  ul {
+    text-transform: none;
+
+    a {
+      font-size: 19px;
+    }
+  }
+}
+
+h2 {
+  text-transform: uppercase;
+  font-weight:    600;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+hr {
+  border-color: $goat;
+}
+
+p {
+  font-weight: 300;
+}
+
+em.highlight {
+  font-weight: 400;
+  font-size:   2rem;
+  font-style:  normal;
+  color:       $goat;
+}
+
+ul.list-pills {
+  margin-left: 0;
+  font-size:   1.4rem;
+
+  > li {
+    margin-bottom: 1rem;
+    padding-left:  0;
+    padding-right: 0;
+
+    .label {
+      font-size: 100%;
+    }
+  }
+}
+
+.label {
+  font-weight: 300;
+
+  &.label-secondary {
+    background-color: $goat-light;
+  }
+}
+
+.text-light {
+  font-weight:    300;
+  text-transform: none;
+}
+
+.text-primary {
+  color: $goat;
+}
+
+.no-gutter > [class*='col-'] {
+  &:not(:first-child) {
+    padding-left: 5px;
+  }
+
+  &:not(:last-child) {
+    padding-right: 5px;
+  }
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.no-border {
+  border: none !important;
+}
+
+.no-background {
+  background: none !important;
+}
+
+.navbar-brand {
+  padding-top:    10px;
+  padding-bottom: 10px;
+}
+
+.table > thead > tr > th {
+  border-color: $goat;
+}
+
+.table-list {
+  font-size: 13px;
+
+  > tbody {
+    > tr {
+      > th {
+        border:       none;
+        padding-left: 0;
+        font-weight:  400;
+      }
+
+      > td {
+        border:        none;
+        padding-right: 0;
+        font-weight:   300;
+      }
+    }
+  }
+}
+
+.table-unstyled {
+  th, td {
+    border: none !important;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  th {
+    font-weight: 400;
+  }
+
+  td {
+    font-weight: 300;
+  }
+}
+
+.actions {
+  a {
+    color:       inherit;
+    font-weight: 300;
+
+    &:hover {
+      color:           inherit;
+      text-decoration: none;
+    }
+  }
+}
+
+#comments-container {
+  .data-container {
+    max-height: 230px;
+    overflow-y: scroll;
+  }
+
+  i.profile-picture {
+    display: none;
+  }
+}
+
+.bar-chart {
+  .row {
+    margin-top:    5px;
+    margin-bottom: 5px;
+  }
+
+  span {
+    display: inline-block;
+    padding: 0.5rem;
+
+    &.bar {
+      background-color: $goat;
+      color:            #FFFFFF;
+      min-width:        4rem;
+    }
+  }
+}
+
+.male {
+  color: $male;
+}
+
+.female {
+  color: $female;
+}
+
+.col-sm-2_4 {
+  width: 20%;
+}
+
+.col-sm-7_2 {
+  width: 60%;
+}
+
+#filters {
+  font-weight: 300;
+
+  .panel {
+    border:        none;
+    border-radius: 1rem;
+
+    .panel-body {
+      border-top-left-radius:  1rem;
+      border-top-right-radius: 1rem;
+    }
+
+    .panel-footer {
+      border-bottom-left-radius:  1rem;
+      border-bottom-right-radius: 1rem;
+    }
+
+    .panel-body,
+    .panel-footer {
+      border:     none;
+      background: $grey;
+    }
+  }
+
+  input,
+  select {
+    border: none;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .related {
+    position: relative;
+
+    &::before {
+      content:    '';
+      display:    block;
+      width:      50%;
+      height:     4px;
+      position:   absolute;
+      top:        calc(50% - 2px);
+      left:       25%;
+      background: white;
+      z-index:    1;
+    }
+
+    > div {
+      z-index: 2;
+    }
+  }
+}
+
+#channel-tabs {
+  border-bottom-width: 4px;
+
+  &.border-goat {
+    border-color: $goat;
+  }
+
+  &.border-facebook {
+    border-color: $facebook;
+  }
+
+  &.border-instagram {
+    border-color: $instagram;
+  }
+
+  &.border-instagramstories {
+    border-color: $instagram-stories;
+  }
+
+  &.border-musicly {
+    border-color: $musicly;
+  }
+
+  &.border-snapchat {
+    border-color: $snapchat;
+  }
+
+  &.border-twitch {
+    border-color: $twitch;
+  }
+
+  &.border-twitter {
+    border-color: $twitter;
+  }
+
+  &.border-youtube {
+    border-color: $youtube;
+  }
+
+  > li {
+    margin-bottom: 0;
+
+    > a {
+      color:          #FFFFFF;
+      border:         none;
+      background:     #000000;
+      font-weight:    600;
+      text-transform: uppercase;
+      border-radius:  0;
+      padding:        5px 10px;
+
+      &.bg-goat {
+        background-color: $goat;
+      }
+
+      &.bg-facebook {
+        background-color: $facebook;
+      }
+
+      &.bg-instagram {
+        background-color: $instagram;
+      }
+
+      &.bg-instagramstories {
+        background-color: $instagram-stories;
+      }
+
+      &.bg-musicly {
+        background-color: $musicly;
+      }
+
+      &.bg-snapchat {
+        background-color: $snapchat;
+      }
+
+      &.bg-twitch {
+        background-color: $twitch;
+      }
+
+      &.bg-twitter {
+        background-color: $twitter;
+      }
+
+      &.bg-youtube {
+        background-color: $youtube;
+      }
+    }
+
+    &:not(.active) {
+      > a {
+        opacity: 0.5;
+      }
+    }
+  }
+}

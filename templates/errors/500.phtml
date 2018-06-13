@@ -1,0 +1,70 @@
+<?php
+use GoatPen\ViewHelpers\Notification;
+?>
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+
+    <title>500 Internal Server Error</title>
+
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
+
+    <script src="https://use.fontawesome.com/b56362b157.js"></script>
+
+    <style>
+        .jumbotron {
+            background: none;
+        }
+
+        .text-danger {
+            color: #d9534f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="jumbotron text-center">
+            <h1>
+                <span class="fa fa-fire text-danger"></span>
+                500 Internal Server Error
+            </h1>
+
+            <p class="lead">The web server is returning an internal error for <em>goatpen.io</em>.</p>
+
+            <?= Notification::render(); ?>
+
+            <p><a class="btn btn-success btn-lg" href="javascript:document.location.reload(true);">Try this page again</a></p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>What happened?</h2>
+
+                <p class="lead">A 500 error status implies there is a problem with the web server's software causing it to malfunction.</p>
+            </div>
+
+            <div class="col-sm-6">
+                <h2>What can I do?</h2>
+
+                <p class="lead">If you're a site visitor</p>
+
+                <p>Nothing you can do at the moment. If you need immediate assistance, please send us an email instead. We apologize for any inconvenience.</p>
+
+                <p class="lead">If you're the site owner</p>
+
+                <p>This error can only be fixed by server admins, please contact your website provider.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

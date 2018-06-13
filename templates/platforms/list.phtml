@@ -1,0 +1,33 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Platforms',
+    'actions'   => (new ActionsNavigation)->add('Add new', '/platforms/new', 'plus'),
+]);
+?>
+
+<table class="table table-condensed" id="platforms">
+    <thead>
+        <tr>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($platforms as $platform) {
+        ?>
+            <tr data-id="<?= $platform->id; ?>">
+                <td><a href="/platforms/<?= $platform->id; ?>/edit"><?= HTML::text($platform->name); ?></a></td>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<script src="<?= CacheBuster::getPath('/js/platforms.js'); ?>"></script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

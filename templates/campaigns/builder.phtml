@@ -1,0 +1,137 @@
+<?php
+use GoatPen\Services\CacheBuster;
+use GoatPen\ViewHelpers\ActionsNavigation;
+use GoatPen\{Channel, Metric};
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => sprintf('Build campaign %s, for %s', $campaign->name, $campaign->client),
+    'actions'   => (new ActionsNavigation)
+        ->add('Add channels', '/influencers?campaign=' . $campaign->getKey(), 'plus'),
+]);
+
+$remainingBudget       = $campaign->remainingBudget();
+$remainingDeliverables = $campaign->remainingDeliverables();
+?>
+
+<div class="jumbotron text-center">
+    <p>Remaining budget</p>
+
+    <h1>
+        <small><i class="fa fa-gbp"></i></small>
+        <span id="budget"
+              class="<?= ($remainingBudget < 0 ? 'text-danger' : ''); ?>"
+              data-raw="<?= $remainingBudget; ?>">
+            <?= number_format($remainingBudget, 2); ?>
+        </span>
+    </h1>
+
+    <?php
+    if (! empty($remainingDeliverables)) {
+        ?>
+        <hr>
+
+        <div class="row text-center">
+            <?php
+            foreach ($remainingDeliverables as $id => $quantity) {
+                $metric = Metric::find($id);
+                ?>
+                <div class="col-sm-2">
+                    <p>
+                        <small><?= HTML::text($metric->name); ?></small>
+                        <br>
+                        <span class="h2 deliverable <?= ($quantity <= 0 ? 'text-success' : ''); ?>"
+                              data-id="<?= $id; ?>"
+                              data-raw="<?= $quantity; ?>"
+                              data-original="<?= $campaign->deliverables[$id]; ?>">
+                        <?= number_format($quantity); ?>
+                    </span>
+                    </p>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+        <?php
+    }
+    ?>
+</div>
+
+<form class="form-inline" method="post">
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Channel</th>
+            <th>Platform</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Posts</th>
+            <th class="text-right">Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        foreach ($channels as $channelId => $posts) {
+            $channel = Channel::find($channelId);
+            $stats   = '';
+
+            foreach ($channel->campaignStats() as $metricId => $stat) {
+                $stats .= sprintf(' data-metric-%d="%s"', $metricId, $stat);
+            }
+            ?>
+            <tr<?= $stats; ?>>
+                <td>
+                    <p class="form-control-static"><?= HTML::text($channel->influencer->name); ?></p>
+                </td>
+                <td>
+                    <p class="form-control-static"><?= HTML::text($channel->name); ?></p>
+                </td>
+                <td>
+                    <p class="form-control-static"><?= HTML::text($channel->platform->name); ?></p>
+                </td>
+                <td class="text-right">
+                    <p class="form-control-static">
+                        <?php
+                        if ($channel->price) {
+                            echo sprintf(
+                                '£<span class="price" data-amount="%s">%s</span>',
+                                $channel->price,
+                                number_format($channel->price, 2)
+                            );
+                        }
+                        ?>
+                    </p>
+                </td>
+                <td class="text-right">
+                    <input class="form-control" size="3" type="number" step="1" min="0" name="channel[<?= $channel->getKey(); ?>]" value="<?= $posts; ?>" style="width: 5em;">
+                </td>
+                <td class="text-right">
+                    <p class="form-control-static">
+                        <?php
+                        if ($channel->price) {
+                            echo sprintf(
+                                '£<span class="total" data-amount="%s">%s</span>',
+                                ($channel->price * $posts),
+                                number_format($channel->price * $posts, 2)
+                            );
+                        }
+                        ?>
+                    </p>
+                </td>
+            </tr>
+        <?php
+        }
+        ?>
+        </tbody>
+    </table>
+
+    <p class="form-control-static">
+        <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+        <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+        <button class="btn btn-primary">Save</button>
+    </p>
+</form>
+
+<script src="<?= CacheBuster::getPath('/js/campaign-builder.js'); ?>"></script>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

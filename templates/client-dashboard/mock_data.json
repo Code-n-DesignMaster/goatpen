@@ -1,0 +1,589 @@
+{
+    "campaign_name": "BetBright",
+    "start_date": "2018-01-01",
+    "end_date": "2018-06-12",
+    "budget_total": 100000,
+    "budget_spent": 65000,
+    "metrics_overall": [
+        {
+            "commitment_level": "guaranteed",
+            "name": "total_posts",
+            "value": 50000
+        },
+        {
+            "commitment_level": "estimated",
+            "name": "total_engagements",
+            "value": 125000
+        },
+        {
+            "commitment_level": "guaranteed",
+            "name": "video_views",
+            "value": 500000
+        },
+        {
+            "commitment_level": "guaranteed",
+            "name": "videos_amplified",
+            "value": 2200
+        },
+        {
+            "commitment_level": "estimated",
+            "name": "impressions",
+            "value": 600000
+        }
+    ],
+    "metrics_by_day": {
+        "2018-01-02": {
+            "total_posts": 731,
+            "total_engagements": 1027,
+            "video_views": 7565,
+            "videos_amplified": 32,
+            "impressions": 8271
+        },
+        "2018-01-03": {
+            "total_posts": 677,
+            "total_engagements": 1799,
+            "video_views": 3059,
+            "videos_amplified": 22,
+            "impressions": 6012
+        },
+        "2018-01-04": {
+            "total_posts": 888,
+            "total_engagements": 1290,
+            "video_views": 6458,
+            "videos_amplified": 39,
+            "impressions": 4697
+        },
+        "2018-01-05": {
+            "total_posts": 978,
+            "total_engagements": 1423,
+            "video_views": 7981,
+            "videos_amplified": 31,
+            "impressions": 6372
+        },
+        "2018-01-06": {
+            "total_posts": 453,
+            "total_engagements": 1337,
+            "video_views": 2729,
+            "videos_amplified": 20,
+            "impressions": 3730
+        },
+        "2018-01-07": {
+            "total_posts": 791,
+            "total_engagements": 1110,
+            "video_views": 6258,
+            "videos_amplified": 18,
+            "impressions": 8400
+        },
+        "2018-01-08": {
+            "total_posts": 665,
+            "total_engagements": 1289,
+            "video_views": 6292,
+            "videos_amplified": 13,
+            "impressions": 6410
+        },
+        "2018-01-09": {
+            "total_posts": 964,
+            "total_engagements": 1664,
+            "video_views": 3443,
+            "videos_amplified": 26,
+            "impressions": 7974
+        },
+        "2018-01-10": {
+            "total_posts": 574,
+            "total_engagements": 1157,
+            "video_views": 5249,
+            "videos_amplified": 34,
+            "impressions": 3750
+        },
+        "2018-01-11": {
+            "total_posts": 859,
+            "total_engagements": 1507,
+            "video_views": 3173,
+            "videos_amplified": 16,
+            "impressions": 5169
+        },
+        "2018-01-12": {
+            "total_posts": 679,
+            "total_engagements": 1370,
+            "video_views": 5507,
+            "videos_amplified": 37,
+            "impressions": 3450
+        },
+        "2018-01-13": {
+            "total_posts": 580,
+            "total_engagements": 1626,
+            "video_views": 6543,
+            "videos_amplified": 34,
+            "impressions": 3505
+        },
+        "2018-01-14": {
+            "total_posts": 838,
+            "total_engagements": 908,
+            "video_views": 4367,
+            "videos_amplified": 19,
+            "impressions": 6535
+        },
+        "2018-01-15": {
+            "total_posts": 976,
+            "total_engagements": 1314,
+            "video_views": 6240,
+            "videos_amplified": 20,
+            "impressions": 4655
+        },
+        "2018-01-16": {
+            "total_posts": 1050,
+            "total_engagements": 1732,
+            "video_views": 4870,
+            "videos_amplified": 32,
+            "impressions": 7155
+        },
+        "2018-01-17": {
+            "total_posts": 772,
+            "total_engagements": 777,
+            "video_views": 3739,
+            "videos_amplified": 39,
+            "impressions": 6881
+        },
+        "2018-01-18": {
+            "total_posts": 763,
+            "total_engagements": 689,
+            "video_views": 5412,
+            "videos_amplified": 19,
+            "impressions": 5846
+        },
+        "2018-01-19": {
+            "total_posts": 696,
+            "total_engagements": 1838,
+            "video_views": 3943,
+            "videos_amplified": 15,
+            "impressions": 3948
+        },
+        "2018-01-20": {
+            "total_posts": 492,
+            "total_engagements": 1142,
+            "video_views": 7275,
+            "videos_amplified": 39,
+            "impressions": 6622
+        },
+        "2018-01-21": {
+            "total_posts": 853,
+            "total_engagements": 908,
+            "video_views": 5233,
+            "videos_amplified": 39,
+            "impressions": 6451
+        },
+        "2018-01-22": {
+            "total_posts": 1018,
+            "total_engagements": 1696,
+            "video_views": 8062,
+            "videos_amplified": 27,
+            "impressions": 6319
+        },
+        "2018-01-23": {
+            "total_posts": 970,
+            "total_engagements": 798,
+            "video_views": 3113,
+            "videos_amplified": 26,
+            "impressions": 5166
+        },
+        "2018-01-24": {
+            "total_posts": 835,
+            "total_engagements": 1685,
+            "video_views": 3746,
+            "videos_amplified": 34,
+            "impressions": 5763
+        },
+        "2018-01-25": {
+            "total_posts": 582,
+            "total_engagements": 666,
+            "video_views": 6337,
+            "videos_amplified": 14,
+            "impressions": 8394
+        },
+        "2018-01-26": {
+            "total_posts": 1019,
+            "total_engagements": 1493,
+            "video_views": 5855,
+            "videos_amplified": 19,
+            "impressions": 2978
+        },
+        "2018-01-27": {
+            "total_posts": 435,
+            "total_engagements": 1147,
+            "video_views": 3218,
+            "videos_amplified": 13,
+            "impressions": 5898
+        },
+        "2018-01-28": {
+            "total_posts": 480,
+            "total_engagements": 1739,
+            "video_views": 7468,
+            "videos_amplified": 28,
+            "impressions": 2904
+        },
+        "2018-01-29": {
+            "total_posts": 836,
+            "total_engagements": 1434,
+            "video_views": 4652,
+            "videos_amplified": 20,
+            "impressions": 5015
+        },
+        "2018-01-30": {
+            "total_posts": 975,
+            "total_engagements": 1376,
+            "video_views": 6040,
+            "videos_amplified": 19,
+            "impressions": 4739
+        },
+        "2018-01-31": {
+            "total_posts": 640,
+            "total_engagements": 831,
+            "video_views": 7319,
+            "videos_amplified": 23,
+            "impressions": 4469
+        },
+        "2018-02-01": {
+            "total_posts": 509,
+            "total_engagements": 1303,
+            "video_views": 7699,
+            "videos_amplified": 35,
+            "impressions": 4783
+        },
+        "2018-02-02": {
+            "total_posts": 732,
+            "total_engagements": 1006,
+            "video_views": 5579,
+            "videos_amplified": 37,
+            "impressions": 3076
+        },
+        "2018-02-03": {
+            "total_posts": 521,
+            "total_engagements": 1385,
+            "video_views": 3756,
+            "videos_amplified": 16,
+            "impressions": 7010
+        },
+        "2018-02-04": {
+            "total_posts": 924,
+            "total_engagements": 696,
+            "video_views": 3486,
+            "videos_amplified": 23,
+            "impressions": 3670
+        },
+        "2018-02-05": {
+            "total_posts": 762,
+            "total_engagements": 1011,
+            "video_views": 3942,
+            "videos_amplified": 17,
+            "impressions": 4708
+        },
+        "2018-02-06": {
+            "total_posts": 1029,
+            "total_engagements": 1219,
+            "video_views": 3000,
+            "videos_amplified": 25,
+            "impressions": 6521
+        },
+        "2018-02-07": {
+            "total_posts": 1022,
+            "total_engagements": 632,
+            "video_views": 3534,
+            "videos_amplified": 38,
+            "impressions": 7039
+        },
+        "2018-02-08": {
+            "total_posts": 836,
+            "total_engagements": 1560,
+            "video_views": 6753,
+            "videos_amplified": 35,
+            "impressions": 3886
+        },
+        "2018-02-09": {
+            "total_posts": 866,
+            "total_engagements": 1706,
+            "video_views": 7953,
+            "videos_amplified": 29,
+            "impressions": 3518
+        },
+        "2018-02-10": {
+            "total_posts": 672,
+            "total_engagements": 1730,
+            "video_views": 4796,
+            "videos_amplified": 20,
+            "impressions": 3873
+        },
+        "2018-02-11": {
+            "total_posts": 948,
+            "total_engagements": 986,
+            "video_views": 5971,
+            "videos_amplified": 32,
+            "impressions": 7841
+        },
+        "2018-02-12": {
+            "total_posts": 1023,
+            "total_engagements": 1437,
+            "video_views": 3745,
+            "videos_amplified": 37,
+            "impressions": 3162
+        },
+        "2018-02-13": {
+            "total_posts": 780,
+            "total_engagements": 1517,
+            "video_views": 7106,
+            "videos_amplified": 22,
+            "impressions": 8179
+        },
+        "2018-02-14": {
+            "total_posts": 376,
+            "total_engagements": 928,
+            "video_views": 5284,
+            "videos_amplified": 29,
+            "impressions": 8220
+        },
+        "2018-02-15": {
+            "total_posts": 1048,
+            "total_engagements": 1651,
+            "video_views": 7478,
+            "videos_amplified": 17,
+            "impressions": 7408
+        },
+        "2018-02-16": {
+            "total_posts": 440,
+            "total_engagements": 678,
+            "video_views": 5022,
+            "videos_amplified": 31,
+            "impressions": 5538
+        },
+        "2018-02-17": {
+            "total_posts": 821,
+            "total_engagements": 809,
+            "video_views": 3696,
+            "videos_amplified": 28,
+            "impressions": 5609
+        },
+        "2018-02-18": {
+            "total_posts": 485,
+            "total_engagements": 1571,
+            "video_views": 3316,
+            "videos_amplified": 35,
+            "impressions": 8235
+        },
+        "2018-02-19": {
+            "total_posts": 914,
+            "total_engagements": 1544,
+            "video_views": 7885,
+            "videos_amplified": 15,
+            "impressions": 3421
+        },
+        "2018-02-20": {
+            "total_posts": 717,
+            "total_engagements": 1326,
+            "video_views": 5905,
+            "videos_amplified": 27,
+            "impressions": 6434
+        },
+        "2018-02-21": {
+            "total_posts": 736,
+            "total_engagements": 1345,
+            "video_views": 3270,
+            "videos_amplified": 30,
+            "impressions": 6240
+        },
+        "2018-02-22": {
+            "total_posts": 1036,
+            "total_engagements": 1024,
+            "video_views": 5288,
+            "videos_amplified": 34,
+            "impressions": 7040
+        },
+        "2018-02-23": {
+            "total_posts": 449,
+            "total_engagements": 1429,
+            "video_views": 6165,
+            "videos_amplified": 36,
+            "impressions": 4643
+        },
+        "2018-02-24": {
+            "total_posts": 871,
+            "total_engagements": 627,
+            "video_views": 4882,
+            "videos_amplified": 36,
+            "impressions": 3197
+        },
+        "2018-02-25": {
+            "total_posts": 511,
+            "total_engagements": 1491,
+            "video_views": 6752,
+            "videos_amplified": 22,
+            "impressions": 4794
+        },
+        "2018-02-26": {
+            "total_posts": 805,
+            "total_engagements": 891,
+            "video_views": 6587,
+            "videos_amplified": 20,
+            "impressions": 7858
+        },
+        "2018-02-27": {
+            "total_posts": 972,
+            "total_engagements": 799,
+            "video_views": 3219,
+            "videos_amplified": 38,
+            "impressions": 5996
+        },
+        "2018-02-28": {
+            "total_posts": 589,
+            "total_engagements": 1799,
+            "video_views": 4663,
+            "videos_amplified": 20,
+            "impressions": 7108
+        },
+        "2018-03-01": {
+            "total_posts": 859,
+            "total_engagements": 1015,
+            "video_views": 6869,
+            "videos_amplified": 38,
+            "impressions": 2822
+        },
+        "2018-03-02": {
+            "total_posts": 951,
+            "total_engagements": 707,
+            "video_views": 3331,
+            "videos_amplified": 30,
+            "impressions": 5923
+        },
+        "2018-03-03": {
+            "total_posts": 754,
+            "total_engagements": 1195,
+            "video_views": 2704,
+            "videos_amplified": 35,
+            "impressions": 4854
+        },
+        "2018-03-04": {
+            "total_posts": 590,
+            "total_engagements": 801,
+            "video_views": 5665,
+            "videos_amplified": 16,
+            "impressions": 3948
+        },
+        "2018-03-05": {
+            "total_posts": 794,
+            "total_engagements": 893,
+            "video_views": 6949,
+            "videos_amplified": 24,
+            "impressions": 3647
+        },
+        "2018-03-06": {
+            "total_posts": 1046,
+            "total_engagements": 1046,
+            "video_views": 7819,
+            "videos_amplified": 37,
+            "impressions": 7940
+        },
+        "2018-03-07": {
+            "total_posts": 391,
+            "total_engagements": 1272,
+            "video_views": 6961,
+            "videos_amplified": 16,
+            "impressions": 7759
+        },
+        "2018-03-08": {
+            "total_posts": 474,
+            "total_engagements": 678,
+            "video_views": 5942,
+            "videos_amplified": 33,
+            "impressions": 3477
+        },
+        "2018-03-09": {
+            "total_posts": 1022,
+            "total_engagements": 701,
+            "video_views": 3384,
+            "videos_amplified": 24,
+            "impressions": 6334
+        },
+        "2018-03-10": {
+            "total_posts": 697,
+            "total_engagements": 1764,
+            "video_views": 3943,
+            "videos_amplified": 16,
+            "impressions": 3147
+        },
+        "2018-03-11": {
+            "total_posts": 846,
+            "total_engagements": 849,
+            "video_views": 6351,
+            "videos_amplified": 22,
+            "impressions": 5299
+        },
+        "2018-03-12": {
+            "total_posts": 598,
+            "total_engagements": 1731,
+            "video_views": 4406,
+            "videos_amplified": 34,
+            "impressions": 5695
+        },
+        "2018-03-13": {
+            "total_posts": 739,
+            "total_engagements": 709,
+            "video_views": 4216,
+            "videos_amplified": 37,
+            "impressions": 5709
+        },
+        "2018-03-14": {
+            "total_posts": 1003,
+            "total_engagements": 1635,
+            "video_views": 4397,
+            "videos_amplified": 36,
+            "impressions": 5028
+        },
+        "2018-03-15": {
+            "total_posts": 885,
+            "total_engagements": 1035,
+            "video_views": 4530,
+            "videos_amplified": 21,
+            "impressions": 4503
+        },
+        "2018-03-16": {
+            "total_posts": 818,
+            "total_engagements": 1503,
+            "video_views": 4160,
+            "videos_amplified": 37,
+            "impressions": 3261
+        },
+        "2018-03-17": {
+            "total_posts": 881,
+            "total_engagements": 1021,
+            "video_views": 6725,
+            "videos_amplified": 37,
+            "impressions": 3848
+        },
+        "2018-03-18": {
+            "total_posts": 992,
+            "total_engagements": 1081,
+            "video_views": 2736,
+            "videos_amplified": 36,
+            "impressions": 7322
+        },
+        "2018-03-19": {
+            "total_posts": 761,
+            "total_engagements": 1127,
+            "video_views": 6473,
+            "videos_amplified": 21,
+            "impressions": 4564
+        },
+        "2018-03-20": {
+            "total_posts": 588,
+            "total_engagements": 965,
+            "video_views": 5085,
+            "videos_amplified": 23,
+            "impressions": 6358
+        },
+        "2018-03-21": {
+            "total_posts": 634,
+            "total_engagements": 734,
+            "video_views": 6852,
+            "videos_amplified": 29,
+            "impressions": 3287
+        }
+    }
+}

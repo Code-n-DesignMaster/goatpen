@@ -1,0 +1,2 @@
+$(function(){$("#add-trait").on("click",function(t){t.preventDefault();var n=$(".trait:last").clone();n.find("select").val(0),$("#traits").append(n),n.find("select").focus()})});
+//# sourceMappingURL=./traits-min.js.map

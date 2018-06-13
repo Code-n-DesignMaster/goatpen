@@ -1,0 +1,44 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+$actions = new ActionsNavigation;
+
+if ($trait->exists) {
+    $actions->add('History', '/traits/' . $trait->id . '/history', 'history');
+    $actions->add('Delete', '/traits/' . $trait->id . '/delete', 'trash');
+}
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => ($trait->exists ? 'Edit trait' : 'New trait'),
+    'actions'   => $actions,
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+
+        <div class="col-sm-10">
+            <input class="form-control" name="name" id="name" placeholder="Name" value="<?= HTML::attr($trait->name); ?>" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="description" class="col-sm-2 control-label">Description</label>
+
+        <div class="col-sm-10">
+            <input class="form-control" name="description" id="description" placeholder="Description" value="<?= HTML::attr($trait->description); ?>">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-default">Save</button>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

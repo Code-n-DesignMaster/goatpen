@@ -1,0 +1,40 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => 'Users',
+    'actions'   => (new ActionsNavigation)->add('Add new', '/users/new', 'plus'),
+]);
+?>
+
+
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Campaigns</th>
+            <th>Owner</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        foreach ($users as $user) {
+            //prepare campaigns as comma separated
+            $campaigns = implode(', ', json_decode($user->campaign, true) ?? []);
+        ?>
+            <tr>
+                <td><a href="/users/<?= $user->id; ?>/edit"><?= HTML::text($user->name); ?></a></td>
+                <td><?= HTML::text($user->email); ?></td>
+                <td><?= HTML::text($campaigns); ?></td>
+                <td><?= ($user->owner ? '<i class="fa fa-lg fa-check"></i>' : ''); ?></td>
+            </tr>
+        <?php
+        }
+        ?>
+    </tbody>
+</table>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>

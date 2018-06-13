@@ -1,0 +1,83 @@
+<?php
+use GoatPen\ViewHelpers\ActionsNavigation;
+use LaravelGems\Escape\HTML;
+
+$actions = new ActionsNavigation;
+
+if ($user->exists) {
+    $actions->add('History', '/users/' . $user->id . '/history', 'history');
+
+    if (! $user->owner) {
+        $actions->add('Delete', '/users/' . $user->id . '/delete', 'trash');
+    }
+}
+
+echo $this->fetch('/partials/header.phtml', [
+    'pageTitle' => ($user->exists ? 'Edit user' : 'New user'),
+    'actions'   => $actions,
+]);
+?>
+
+<form class="form-horizontal" method="post">
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+
+        <div class="col-sm-10">
+            <input class="form-control" name="name" id="name" placeholder="Name" value="<?= HTML::attr($user->name); ?>" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="email" class="col-sm-2 control-label">Email</label>
+
+        <div class="col-sm-10">
+            <input type="email" class="form-control" name="email" id="email" placeholder="Email" value="<?= HTML::attr($user->email); ?>" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="owner" class="col-sm-2 control-label">Owner</label>
+
+        <div class="col-sm-10">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="owner" id="owner" <?= ($user->owner ? 'checked' : ''); ?>>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Campaigns</label>
+
+        <div class="col-sm-10">
+            <div class="checkbox">
+                <ul class="list-unstyled">
+                    <?php
+    
+                    foreach ($campaigns as $campaign) {
+                        ?>
+                        <li>
+                            <label>
+                                <input type="checkbox" name="campaign_slug[]" value="<?= $campaign['slug'] ?>" <?= (in_array($campaign['slug'], $user['campaigns']) ? 'checked' : ''); ?>>
+                                <?= HTML::text($campaign['slug']); ?>
+                            </label>
+                        </li>
+                        <?php
+                    }
+                    ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input type="hidden" name="<?= $csrf->getTokenNameKey(); ?>" value="<?= $csrf->getTokenName(); ?>">
+            <input type="hidden" name="<?= $csrf->getTokenValueKey(); ?>" value="<?= $csrf->getTokenValue(); ?>">
+            <button class="btn btn-default">Save</button>
+        </div>
+    </div>
+</form>
+
+<?= $this->fetch('/partials/footer.phtml'); ?>
